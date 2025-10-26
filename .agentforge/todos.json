@@ -79,9 +79,26 @@
       "id": "04",
       "label": "core",
       "description": "Implement provider auth interface with pluggable backends (Anthropic, Gemini, Ollama, Local). Provide both API key and OAuth path for providers that require browser auth.",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T15:13:00.273911",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:13:00.273911",
+          "notes": "AuthManager registers Anthropic, Gemini, Ollama, and Local providers with credential encryption support."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:13:00.273911",
+          "notes": "ForgeApp bootstrap exposed provider list and pytest covered credential and OAuth metadata workflows."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T15:13:00.273911"
+        }
+      }
     },
     {
       "id": "05",

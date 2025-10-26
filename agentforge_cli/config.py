@@ -24,6 +24,43 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "anthropic_login_url": constants.ANTHROPIC_LOGIN_URL,
     "last_login": None,
     "keys": {},
+    "providers": {
+        "anthropic": {
+            "oauth": {
+                "authorize_url": "https://console.anthropic.com/oauth/authorize",
+                "token_url": "https://api.anthropic.com/oauth/token",
+                "client_id": None,
+                "scopes": [
+                    "org:create_api_key",
+                    "user:profile",
+                    "user:inference",
+                ],
+                "extra_params": {
+                    "redirect_uri": "https://console.anthropic.com/oauth/code/callback",
+                },
+            }
+        },
+        "gemini": {
+            "oauth": {
+                "authorize_url": "https://accounts.google.com/o/oauth2/v2/auth",
+                "token_url": "https://oauth2.googleapis.com/token",
+                "client_id": None,
+                "scopes": [
+                    "https://www.googleapis.com/auth/generative-language.retriever",
+                ],
+                "extra_params": {
+                    "access_type": "offline",
+                    "prompt": "consent",
+                },
+            }
+        },
+        "ollama": {
+            "http": {
+                "base_url": "http://localhost:11434",
+            }
+        },
+        "local": {},
+    },
 }
 
 
@@ -128,6 +165,8 @@ def get_paths() -> Dict[str, Path]:
         "agent_log_template": constants.AGENT_LOG_TEMPLATE,
         "env_file": constants.ENV_FILE,
         "schedules_dir": constants.SCHEDULES_DIR,
+        "credentials_file": constants.CREDENTIALS_FILE,
+        "credential_key_file": constants.CREDENTIAL_KEY_FILE,
     }
 
 

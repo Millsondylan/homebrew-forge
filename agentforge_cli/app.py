@@ -7,6 +7,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Any, Dict
 
+from .auth import AuthManager, CredentialStore
 from .config import get_paths, load_config
 
 
@@ -23,6 +24,7 @@ class ForgeApp:
     config: Dict[str, Any]
     paths: Dict[str, Any]
     state: Dict[str, Any] = field(default_factory=dict)
+    _auth_manager: AuthManager | None = field(default=None, init=False, repr=False)
 
     @classmethod
     def bootstrap(cls) -> ForgeApp:
@@ -38,6 +40,18 @@ class ForgeApp:
         """
         self.config = load_config()
         self.paths = get_paths()
+        if self._auth_manager is not None:
+            # Refresh credential store paths in case the config root moved.
+            self._auth_manager = AuthManager(
+                CredentialStore(self.paths["credentials_file"], self.paths["credential_key_file"]),
+                load_config,
+            )
+
+    def auth(self) -> AuthManager:
+        if self._auth_manager is None:
+            store = CredentialStore(self.paths["credentials_file"], self.paths["credential_key_file"])
+            self._auth_manager = AuthManager(store, load_config)
+        return self._auth_manager
 
 
 __all__ = ["ForgeApp"]

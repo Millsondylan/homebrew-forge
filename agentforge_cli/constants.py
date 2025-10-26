@@ -21,6 +21,8 @@ SCHEDULES_DIR: Path
 AGENT_LOG_TEMPLATE: Path
 SYSTEM_LOG_FILE: Path
 TASK_DB: Path
+CREDENTIALS_FILE: Path
+CREDENTIAL_KEY_FILE: Path
 
 # Default Anthropic login URL used to launch the standard Anthropic browser sign-in flow.
 ANTHROPIC_LOGIN_URL = "https://console.anthropic.com/login"
@@ -45,7 +47,7 @@ def refresh_paths() -> None:
     """Refresh filesystem-derived constants from environment variables."""
     global CONFIG_ROOT, CONFIG_FILE, ENV_FILE, AGENTS_DIR, DATA_DIR, DB_DIR
     global LOG_DIR, SCHEDULES_DIR, AGENT_LOG_TEMPLATE, SYSTEM_LOG_FILE, TASK_DB
-    global MANIFEST_FILE
+    global MANIFEST_FILE, CREDENTIALS_FILE, CREDENTIAL_KEY_FILE
 
     root = Path(os.environ.get("AGENTFORGE_HOME", str(DEFAULT_CONFIG_ROOT))).expanduser()
     CONFIG_ROOT = root
@@ -60,6 +62,8 @@ def refresh_paths() -> None:
     SYSTEM_LOG_FILE = LOG_DIR / "system.log"
     TASK_DB = DB_DIR / "tasks.db"
     MANIFEST_FILE = root / "manifest.log"
+    CREDENTIALS_FILE = root / "credentials.json"
+    CREDENTIAL_KEY_FILE = root / ".credentials.key"
 
 
 refresh_paths()
