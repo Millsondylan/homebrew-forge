@@ -60,6 +60,12 @@ DEFAULT_CONFIG: Dict[str, Any] = {
             }
         },
         "local": {},
+        "cto_new": {
+            "session": {
+                "login_url": "https://cto.new/login",
+                "notes": "After logging in, copy the __Secure-next-auth.session-token cookie and session_id from your browser dev tools.",
+            }
+        },
     },
     "model_catalog": {
         "anthropic": constants.DEFAULT_MODELS,

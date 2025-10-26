@@ -59,7 +59,7 @@ def test_oauth_metadata_fetch(credential_store: CredentialStore, config: Dict) -
 def test_list_status_includes_registered_providers(credential_store: CredentialStore, config: Dict) -> None:
     manager = AuthManager(credential_store, lambda: config)
     status = manager.list_status()
-    assert "anthropic" in status
+    assert {"anthropic", "cto_new"}.issubset(status.keys())
     manager.store_api_key("gemini", "gm-test")
     updated = manager.list_status()["gemini"]["updated_at"]
     assert updated is not None
@@ -70,3 +70,16 @@ def test_ollama_endpoint_roundtrip(credential_store: CredentialStore, config: Di
     provider = manager.provider("ollama")
     provider.store_endpoint(credential_store, "http://localhost:11434")
     assert provider.load_endpoint(credential_store) == "http://localhost:11434"
+
+
+def test_cto_new_session_storage(credential_store: CredentialStore, config: Dict) -> None:
+    manager = AuthManager(credential_store, lambda: config)
+    provider = manager.provider("cto_new")
+    provider.store_session_tokens(
+        credential_store,
+        session_id="sess",
+        cookie="cookie",
+        organization_id="org",
+    )
+    record = credential_store.load("cto_new")
+    assert record["modes"]["session"]["session_id"] == "sess"

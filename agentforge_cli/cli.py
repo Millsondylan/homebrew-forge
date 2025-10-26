@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import json
 import time
+import webbrowser
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -205,6 +206,42 @@ def gemini(app: ForgeApp, api_key: str) -> None:
     store_key("gemini", api_key)
     app.refresh()
     click.echo("Gemini key saved.")
+
+
+@auth.command("cto-new")
+@click.option("--session-id", required=False, help="Session identifier from cto.new cookie.")
+@click.option("--cookie", required=False, help="Value of the __Secure-next-auth.session-token cookie.")
+@click.option("--organization-id", required=False, help="Organization ID from the cto.new API response.")
+@click.option("--browser", is_flag=True, help="Open the cto.new login page in your browser.")
+@click.pass_obj
+def auth_cto_new(
+    app: ForgeApp,
+    session_id: Optional[str],
+    cookie: Optional[str],
+    organization_id: Optional[str],
+    browser: bool,
+) -> None:
+    """Configure cto.new credentials."""
+    if browser:
+        webbrowser.open("https://cto.new/login", new=1)
+        click.echo("Complete the login in your browser, then supply session details with --session-id/--cookie/--organization-id.")
+
+    if not (session_id and cookie and organization_id):
+        if browser:
+            return
+        raise click.UsageError("Provide --session-id, --cookie, and --organization-id or use --browser to launch login.")
+
+    manager = app.auth()
+    provider = manager.provider("cto_new")
+    provider.store_session_tokens(
+        manager.store,  # type: ignore[attr-defined]
+        session_id=session_id,
+        cookie=cookie,
+        organization_id=organization_id,
+    )
+    app.refresh()
+    write_system_log("cto.new session tokens stored securely.")
+    click.echo("cto.new session tokens stored.")
 
 
 @cli.command(name="/login")

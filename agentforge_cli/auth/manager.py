@@ -6,7 +6,13 @@ from typing import Callable, Dict, Iterable, Optional
 
 from .credential_store import CredentialStore
 from .provider import AuthProvider, OAuthMetadata
-from .providers import AnthropicProvider, GeminiProvider, LocalProvider, OllamaProvider
+from .providers import (
+    AnthropicProvider,
+    CtoNewProvider,
+    GeminiProvider,
+    LocalProvider,
+    OllamaProvider,
+)
 
 
 class AuthManager:
@@ -27,6 +33,7 @@ class AuthManager:
             GeminiProvider(),
             OllamaProvider(),
             LocalProvider(),
+            CtoNewProvider(),
         ):
             self.register(provider)
 

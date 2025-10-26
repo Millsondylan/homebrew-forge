@@ -66,7 +66,16 @@ This will **open your web browser** and redirect you to Anthropic's authenticati
 
 Looking for the full build philosophy, execution pipeline, and verification rules? Read the dedicated [AgentForge Development Manifest](AGENTFORGE_DEVELOPMENT_MANIFEST.md). It codifies discovery-first workflows, the 20+ TODO requirement, browser-based Anthropic authentication via `forge /login`, and double verification standards for every agent execution loop.
 
-### 3. Pick Your Primary Model
+### 3. Authenticate with cto.new
+
+```bash
+forge auth cto-new --browser
+forge auth cto-new --session-id <session_id> --cookie '<session-token>' --organization-id <org_id>
+```
+
+After logging in at https://cto.new/login, open your browser's developer tools to capture the `session_id`, the `__Secure-next-auth.session-token` cookie value, and your `organization_id` from network responses. Supply those values to the command above and Forge encrypts them for future use.
+
+### 4. Pick Your Primary Model
 
 Use the slash command for an interactive picker:
 
@@ -82,7 +91,7 @@ forge model select
 
 Either way, your choice persists in `~/.agentforge/config.yaml`.
 
-### 4. Set the Agent Workforce Model
+### 5. Set the Agent Workforce Model
 
 Define which model concurrent worker agents will run:
 
@@ -96,7 +105,7 @@ You can also update it directly:
 forge agent model set claude-3-5-haiku-20241022
 ```
 
-### 5. Add Tasks to the Queue
+### 6. Add Tasks to the Queue
 
 ```bash
 forge queue add "Refactor authentication module"
@@ -104,7 +113,7 @@ forge queue add "Add unit tests for user service"
 forge queue add "Optimize database queries"
 ```
 
-### 6. Run Agents
+### 7. Run Agents
 
 Launch agents to process your task queue:
 
@@ -118,25 +127,25 @@ Or spawn agents directly:
 forge agent spawn 10
 ```
 
-### 6. Search Agent Memory
+### 8. Search Agent Memory
 
 ```bash
 forge memory search "oauth"
 ```
 
-### 7. Preview System Prompts
+### 9. Preview System Prompts
 
 ```bash
 forge prompt preview "Implement autoscaling dispatcher" --context "Refer to runtime.autoscale settings"
 ```
 
-### 8. Launch the Dashboard
+### 10. Launch the Dashboard
 
 ```bash
 forge dashboard --host 127.0.0.1 --port 8765
 ```
 
-### 9. Run the Load Test
+### 11. Run the Load Test
 
 ```bash
 scripts/loadtest.sh --agents 500 --tasks 1000 --report reports/loadtest.json --reset
