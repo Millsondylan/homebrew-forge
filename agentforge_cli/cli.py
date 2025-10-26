@@ -21,6 +21,7 @@ from .config import (
 from .app import ForgeApp
 from .constants import DEFAULT_MODELS
 from .logger import init_logging, write_system_log
+from .memory import default_memory_store
 from .queue import TaskStore, run_task_loop
 from .scheduler import add_scheduled_task, parse_schedule_time, run_schedule_loop
 from . import get_version
@@ -451,6 +452,34 @@ def add(
 def run(app: ForgeApp, poll: Optional[int], once: bool) -> None:
     """Run the scheduling loop."""
     run_schedule_loop(poll_seconds=poll, once=once)
+
+
+@cli.group()
+@click.pass_context
+def memory(ctx: click.Context) -> None:
+    """Agent memory operations."""
+    if ctx.obj is None or not isinstance(ctx.obj, ForgeApp):
+        ctx.obj = ForgeApp.bootstrap()
+
+
+@memory.command()
+@click.argument("query")
+@click.option("--limit", default=5, show_default=True, type=int)
+@click.option("--agent-id", default=None, help="Filter by agent identifier.")
+@click.pass_obj
+def search(app: ForgeApp, query: str, limit: int, agent_id: Optional[str]) -> None:
+    """Search stored agent memories."""
+    with default_memory_store() as store:
+        results = store.search(query, limit=limit, agent_id=agent_id)
+    if not results:
+        click.echo("No memories found.")
+        return
+    click.echo(f"Top {len(results)} memories:")
+    for record in results:
+        snippet = record.content[:120] + ("…" if len(record.content) > 120 else "")
+        click.echo(
+            f"- [{record.similarity:.2f}] {record.agent_id} #{record.id} | {snippet}"
+        )
 
 
 @cli.command()

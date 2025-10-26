@@ -210,6 +210,7 @@ def get_paths() -> Dict[str, Path]:
         "schedules_dir": constants.SCHEDULES_DIR,
         "credentials_file": constants.CREDENTIALS_FILE,
         "credential_key_file": constants.CREDENTIAL_KEY_FILE,
+        "memory_db": constants.MEMORY_DB,
     }
 
 

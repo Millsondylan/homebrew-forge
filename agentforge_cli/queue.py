@@ -17,6 +17,7 @@ from croniter import croniter
 from . import constants
 from .config import get_runtime_settings, load_config
 from .logger import write_agent_log, write_system_log
+from .memory import default_memory_store
 from .runtime.dispatcher import AgentDispatcher, AutoscaleState
 
 
@@ -524,6 +525,19 @@ def _process_task(worker_id: int, store: TaskStore, task: Task, agent_model: str
         result_message = f"Completed with {agent_model}"
         store.complete_task(task.id, result_message)
         write_agent_log(worker_id, f"Task {task.id}: PASSED ✔ ({result_message})")
+        try:
+            with default_memory_store() as memory_store:
+                memory_store.add_memory(
+                    agent_id=f"agent-{worker_id:03d}",
+                    content=f"Task {task.id}: {task.description} -> {result_message}",
+                    metadata={
+                        "task_id": task.id,
+                        "agent_model": agent_model,
+                        "attempts": task.attempts,
+                    },
+                )
+        except Exception as exc:  # pragma: no cover - best effort
+            write_system_log(f"Memory store error for task {task.id}: {exc}")
     else:  # pragma: no cover
         store.fail_task(task, "Empirical verification failed")
         write_agent_log(

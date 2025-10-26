@@ -9,6 +9,7 @@ from typing import Any, Dict
 
 from .auth import AuthManager, CredentialStore
 from .config import get_paths, load_config
+from .memory import MemoryStore
 
 
 @dataclass
@@ -25,6 +26,7 @@ class ForgeApp:
     paths: Dict[str, Any]
     state: Dict[str, Any] = field(default_factory=dict)
     _auth_manager: AuthManager | None = field(default=None, init=False, repr=False)
+    _memory_store: MemoryStore | None = field(default=None, init=False, repr=False)
 
     @classmethod
     def bootstrap(cls) -> ForgeApp:
@@ -46,12 +48,20 @@ class ForgeApp:
                 CredentialStore(self.paths["credentials_file"], self.paths["credential_key_file"]),
                 load_config,
             )
+        if self._memory_store is not None:
+            self._memory_store.close()
+            self._memory_store = MemoryStore(self.paths["memory_db"])
 
     def auth(self) -> AuthManager:
         if self._auth_manager is None:
             store = CredentialStore(self.paths["credentials_file"], self.paths["credential_key_file"])
             self._auth_manager = AuthManager(store, load_config)
         return self._auth_manager
+
+    def memory(self) -> MemoryStore:
+        if self._memory_store is None:
+            self._memory_store = MemoryStore(self.paths["memory_db"])
+        return self._memory_store
 
 
 __all__ = ["ForgeApp"]
