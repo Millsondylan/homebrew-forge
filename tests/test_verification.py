@@ -7,6 +7,7 @@ import pytest
 
 from agentforge_cli import constants
 from agentforge_cli.queue import TaskStore, run_task_loop
+from agentforge_cli.verification import export_verification_report
 
 
 @pytest.fixture(autouse=True)
@@ -31,3 +32,8 @@ def test_verification_log_records_checks(tmp_path: Path):
     checks = {entry["check"] for entry in entries}
     assert {"logical", "empirical"}.issubset(checks)
     assert all(entry["passed"] for entry in entries)
+
+    report_path = export_verification_report()
+    assert report_path.exists()
+    exported = json.loads(report_path.read_text())
+    assert len(exported) >= 2

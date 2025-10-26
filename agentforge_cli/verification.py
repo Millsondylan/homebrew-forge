@@ -57,4 +57,17 @@ class VerificationManager:
         return result
 
 
-__all__ = ["VerificationManager", "VerificationResult"]
+def export_verification_report(output_path: Optional[Path] = None) -> Path:
+    constants.refresh_paths()
+    source = constants.LOG_DIR / "verification.log"
+    if not source.exists():
+        raise FileNotFoundError("No verification log found.")
+    entries = [json.loads(line) for line in source.read_text().splitlines() if line]
+    if output_path is None:
+        timestamp = datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")
+        output_path = constants.LOG_DIR / f"verification_{timestamp}.json"
+    output_path.write_text(json.dumps(entries, indent=2), encoding="utf-8")
+    return output_path
+
+
+__all__ = ["VerificationManager", "VerificationResult", "export_verification_report"]

@@ -7,6 +7,7 @@ from __future__ import annotations
 import json
 import time
 from datetime import datetime
+from pathlib import Path
 from typing import Optional
 
 import click
@@ -30,6 +31,7 @@ from .scheduler import add_scheduled_task, parse_schedule_time, run_schedule_loo
 from . import get_version
 from .oauth.flow import perform_pkce_oauth
 from .runtime.events import broadcast_model_change
+from .verification import export_verification_report
 
 
 def _prompt_model_choice(models: list[str], label: str) -> str:
@@ -574,6 +576,23 @@ def dashboard(app: ForgeApp, host: str, port: int) -> None:
         server.shutdown()
     finally:
         server.server_close()
+
+
+@cli.group()
+@click.pass_context
+def verify(ctx: click.Context) -> None:
+    """Verification tooling."""
+    if ctx.obj is None or not isinstance(ctx.obj, ForgeApp):
+        ctx.obj = ForgeApp.bootstrap()
+
+
+@verify.command("export")
+@click.option("--output", type=click.Path(path_type=Path), default=None, help="Destination file for verification report.")
+@click.pass_obj
+def verify_export(app: ForgeApp, output: Optional[Path]) -> None:
+    """Export accumulated verification results to a timestamped JSON file."""
+    report_path = export_verification_report(output)
+    click.echo(f"Verification report written to {report_path}")
 
 
 @cli.command()
