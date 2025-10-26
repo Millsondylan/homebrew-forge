@@ -429,9 +429,26 @@
       "id": "18",
       "label": "support",
       "description": "Implement safe shutdown and restart recovery preserving in-flight tasks and agent state.",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T16:31:58.126527",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:31:58.126527",
+          "notes": "Dispatcher shutdown now requeues in-flight tasks with attempt rollback."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:31:58.126527",
+          "notes": "Safe shutdown test simulates KeyboardInterrupt and confirms tasks return to pending state."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:31:58.126527"
+        }
+      }
     },
     {
       "id": "19",

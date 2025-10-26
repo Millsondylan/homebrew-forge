@@ -468,6 +468,23 @@ class TaskStore:
                 (now_iso,),
             ).fetchone()[0]
 
+    def requeue_running(self, reason: str = "Interrupted during shutdown") -> int:
+        now_iso = datetime.utcnow().isoformat()
+        with self.lock:
+            cur = self.conn.execute(
+                """
+                UPDATE tasks
+                SET status = 'pending',
+                    available_at = ?,
+                    last_error = ?,
+                    attempts = CASE WHEN attempts > 0 THEN attempts - 1 ELSE 0 END
+                WHERE status = 'running'
+                """,
+                (now_iso, reason),
+            )
+            self.conn.commit()
+            return cur.rowcount
+
 
 def run_task_loop(concurrency: int, agent_model: Optional[str] = None, autoscale: Optional[bool] = None) -> None:
     constants.refresh_paths()
@@ -498,6 +515,10 @@ def run_task_loop(concurrency: int, agent_model: Optional[str] = None, autoscale
 
     try:
         dispatcher.run()
+    except KeyboardInterrupt:
+        write_system_log("Shutdown signal received; requeuing running tasks.", level="WARN")
+        pending = store.requeue_running()
+        write_system_log(f"Requeued {pending} running task(s) for future execution.", level="WARN")
     finally:
         store.close()
         write_system_log("Queue run completed.")
