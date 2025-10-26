@@ -1,0 +1,635 @@
+{
+  "generated_at": "2025-10-26T16:56:51.194749Z",
+  "todos": [
+    {
+      "id": "01",
+      "label": "core",
+      "description": "Search repository files and extract: existing CLI code, package manifests, Dockerfiles, tests, and README. Persist results to /.agentforge/discovery.json.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:46:09.968421",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T14:43:50.558472",
+          "notes": "Validated discovery.json includes primary CLI and dependency metadata."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T14:43:50.558472",
+          "notes": "Loaded discovery.json via python3 and confirmed key presence."
+        },
+        "integration": {
+          "status": "passed",
+          "timestamp": "2025-10-26T14:46:09.968421",
+          "notes": "Invoked CLI help via Click test runner to confirm entry point operational."
+        }
+      }
+    },
+    {
+      "id": "02",
+      "label": "core",
+      "description": "Design CLI skeleton (Python Click or Go Cobra). Provide commands: forge init, forge auth anthropic, forge model set, forge agent spawn, forge queue add, forge schedule, forge monitor.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:52:02.918660",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T14:52:02.918660",
+          "notes": "CLI skeleton refactored to use shared ForgeApp context and command groups verified via pytest."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T14:52:02.918660",
+          "notes": "Click runner exercised auth/model/agent/queue/schedule group help invocations successfully."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest tests/test_cli_structure.py -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T14:52:02.918660"
+        }
+      }
+    },
+    {
+      "id": "03",
+      "label": "core",
+      "description": "Implement `forge init` to create config, .env, and default directories (/agents, /logs, /db, /schedules).",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T15:01:34.423587",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:01:34.423587",
+          "notes": "forge init now provisions agents, logs, db, schedules directories and persists .env template."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:01:34.423587",
+          "notes": "CliRunner invocation confirmed workspace initialization under a temporary AGENTFORGE_HOME path."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T15:01:34.423587"
+        }
+      }
+    },
+    {
+      "id": "04",
+      "label": "core",
+      "description": "Implement provider auth interface with pluggable backends (Anthropic, Gemini, Ollama, Local). Provide both API key and OAuth path for providers that require browser auth.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T15:13:00.273911",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:13:00.273911",
+          "notes": "AuthManager registers Anthropic, Gemini, Ollama, and Local providers with credential encryption support."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:13:00.273911",
+          "notes": "ForgeApp bootstrap exposed provider list and pytest covered credential and OAuth metadata workflows."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T15:13:00.273911"
+        }
+      }
+    },
+    {
+      "id": "05",
+      "label": "core",
+      "description": "Implement `forge auth anthropic --api-key <key>` and `forge auth anthropic --oauth` that opens the system browser to start OAuth and captures tokens locally (store tokens encrypted in ~/.agentforge/credentials.json).",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T15:23:46.206076",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:23:46.206076",
+          "notes": "CLI now supports --api-key and --oauth for Anthropic with credential vault integration."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:23:46.206076",
+          "notes": "CliRunner exercised auth command and tests patched OAuth flow to ensure persisted tokens."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T15:23:46.206076"
+        }
+      }
+    },
+    {
+      "id": "06",
+      "label": "support",
+      "description": "Add a small HTTP listener for OAuth redirect capture on localhost and validate redirect URIs per OAuth rules.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T15:15:36.276493",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:15:36.276493",
+          "notes": "Local OAuth listener validates redirect hosts and enforces state checking."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:15:36.276493",
+          "notes": "Manual invocation confirmed redirect URI validation."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T15:15:36.276493"
+        }
+      }
+    },
+    {
+      "id": "07",
+      "label": "core",
+      "description": "Implement `forge model set <provider>:<model>` that updates runtime config and broadcasts model-change to active agents.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T15:32:28.284838",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:32:28.284838",
+          "notes": "forge model set now accepts provider:model syntax and updates config with provider mapping."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:32:28.284838",
+          "notes": "Model set command invoked via CliRunner and model event log captured broadcast."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T15:32:28.284838"
+        }
+      }
+    },
+    {
+      "id": "08",
+      "label": "core",
+      "description": "Implement agent worker pool and dispatcher capable of N concurrent agents (configurable). Begin with default N=10; include autoscaling hooks to reach 500 in v2 tests.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T15:45:13.712562",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:45:13.712562",
+          "notes": "AgentDispatcher manages worker pool with autoscaling hooks up to configured max concurrency."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:45:13.712562",
+          "notes": "Cli queue run exercised via pytest dispatcher tests to ensure tasks complete under autoscaling."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T15:45:13.712562"
+        }
+      }
+    },
+    {
+      "id": "09",
+      "label": "core",
+      "description": "Implement persistent task queue backed by SQLite or Redis with retry, backoff, and idempotency keys.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T15:56:27.586131",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:56:27.586131",
+          "notes": "SQLite queue tracks attempts, backoff, idempotency keys, and delayed availability with structured stats."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:56:27.586131",
+          "notes": "Queue retry tests exercised failure backoff, idempotent enqueue, and completion paths."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T15:56:27.586131"
+        }
+      }
+    },
+    {
+      "id": "10",
+      "label": "core",
+      "description": "Implement scheduler to add tasks to queue at specified times with cron-like syntax.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:03:45.635625",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:03:45.635625",
+          "notes": "Scheduler now supports cron expressions, timezones, and recurring runs with max-runs limits."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:03:45.635625",
+          "notes": "Scheduler tests confirmed cron rescheduling and completion behavior."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:03:45.635625"
+        }
+      }
+    },
+    {
+      "id": "11",
+      "label": "core",
+      "description": "Implement memory persistence and retrieval for agents (simple vector DB stub + metadata store). Use a local vector store (FAISS or SQLite-embeddings) as default.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:09:19.580911",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:09:19.580911",
+          "notes": "MemoryStore persists agent memories with hashed embeddings and cosine search."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:09:19.580911",
+          "notes": "Queue processing writes to memory store and CLI memory search retrieves entries."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:09:19.580911"
+        }
+      }
+    },
+    {
+      "id": "12",
+      "label": "core",
+      "description": "Implement enhanced system prompt manager that injects strict discipline rules (truth, double verification) into each agent's system prompt.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:13:20.777407",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:13:20.777407",
+          "notes": "Prompt manager injects discipline rules and default verification requirements into every system prompt."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:13:20.777407",
+          "notes": "Queue worker logs rendered prompts and CLI preview displays full prompt with user-provided context."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:13:20.777407"
+        }
+      }
+    },
+    {
+      "id": "13",
+      "label": "support",
+      "description": "Add logging subsystem: per-agent logs at /logs/agent_<id>.log and a system log /logs/system.log. Ensure rotation and structured JSON output.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:16:40.376084",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:16:40.376084",
+          "notes": "Logging now emits structured JSON with rotation for system and per-agent logs."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:16:40.376084",
+          "notes": "Logger tests confirmed JSON format and rotation; queue writes structured entries during processing."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:16:40.376084"
+        }
+      }
+    },
+    {
+      "id": "14",
+      "label": "support",
+      "description": "Add CLI `forge monitor` to stream logs and show agent status and queue length.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:26:24.160579",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:26:24.160579",
+          "notes": "forge monitor now reports JSON stats and supports log streaming with interval refresh."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:26:24.160579",
+          "notes": "CLI tests confirmed queue stats output; manual follow mode streams system log entries."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:26:24.160579"
+        }
+      }
+    },
+    {
+      "id": "15",
+      "label": "core",
+      "description": "Implement self-verification hooks: logical checks (unit/assert) and empirical checks (execute test callable or integration call) after each task.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:21:35.383620",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:21:35.383620",
+          "notes": "VerificationManager logs logical and empirical results per task."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:21:35.383620",
+          "notes": "Empirical hook confirms memory artifacts exist after completion; failures requeue tasks."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:21:35.383620"
+        }
+      }
+    },
+    {
+      "id": "16",
+      "label": "verify",
+      "description": "Write unit tests for auth, model switching, queue operations, and scheduler. Ensure tests run in CI.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:27:35.758853",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:27:35.758853",
+          "notes": "Auth, model, queue, and scheduler behaviors covered by dedicated pytest suites."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:27:35.758853",
+          "notes": "Complete pytest run validates CLI auth, model commands, queue retry logic, and cron scheduler recurrence."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:27:35.758853"
+        }
+      }
+    },
+    {
+      "id": "17",
+      "label": "verify",
+      "description": "Integration test: spawn 20 agents, run 50 queued tasks, ensure all tasks reach terminal state with logs and verification passes.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:29:13.559479",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:29:13.559479",
+          "notes": "Integration test spawns 20 workers across 50 tasks and confirms all complete."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:29:13.559479",
+          "notes": "pytest integration scenario validates dispatcher scaling and queue completion."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:29:13.559479"
+        }
+      }
+    },
+    {
+      "id": "18",
+      "label": "support",
+      "description": "Implement safe shutdown and restart recovery preserving in-flight tasks and agent state.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:31:58.126527",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:31:58.126527",
+          "notes": "Dispatcher shutdown now requeues in-flight tasks with attempt rollback."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:31:58.126527",
+          "notes": "Safe shutdown test simulates KeyboardInterrupt and confirms tasks return to pending state."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:31:58.126527"
+        }
+      }
+    },
+    {
+      "id": "19",
+      "label": "support",
+      "description": "Create simple web dashboard (optional minimal) to show agent counts, queue stats, and provide a manual model switch UI.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:37:31.953507",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:37:31.953507",
+          "notes": "Dashboard exposes queue metrics and model switches via minimal web UI."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:37:31.953507",
+          "notes": "HTTP integration test confirmed HTML rendering and model change action."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:37:31.953507"
+        }
+      }
+    },
+    {
+      "id": "20",
+      "label": "verify",
+      "description": "Load test: simulate agent up to 500 (use synthetic agent stub) and measure queue throughput and retries. Log results and thresholds.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:40:41.506304",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:40:41.506304",
+          "notes": "Load test script seeds tasks, runs dispatcher, and records metrics to JSON."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:40:41.506304",
+          "notes": "Pytest load test ensures report generation and completion counts for simulated agents."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:40:41.506304"
+        }
+      }
+    },
+    {
+      "id": "21",
+      "label": "support",
+      "description": "Document commands, config, and dev setup. Update README with run instructions and verification checklist.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:42:11.606667",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:42:11.606667",
+          "notes": "README documents memory, prompt, monitor, dashboard, and load test commands."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:42:11.606667",
+          "notes": "Documentation changes validated via repository review; commands referenced are covered by automated tests."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:42:11.606667"
+        }
+      }
+    },
+    {
+      "id": "22",
+      "label": "verify",
+      "description": "Perform full double verification pass: for each core feature run logical and empirical checks and append results to /logs/verification_<timestamp>.json.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:50:38.628678",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:50:38.628678",
+          "notes": "Verification export aggregates logical and empirical check results into timestamped JSON."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:50:38.628678",
+          "notes": "Pytest suite generates verification logs, exports report, and confirms JSON structure."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:50:38.628678"
+        }
+      }
+    },
+    {
+      "id": "23",
+      "label": "core",
+      "description": "Implement `/login` shorthand that invokes `forge auth anthropic --oauth` and opens a browser. Provide fallback to paste auth code if redirect listener fails. Use cli tool UX patterns used by Claude Code/Tempo.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:44:30.706772",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:44:30.706772",
+          "notes": "/login invokes Anthropic OAuth flow with browser fallback and manual code support."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:44:30.706772",
+          "notes": "CLI tests exercise auth anthropic OAuth path; prompt/credential hooks run end-to-end."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:44:30.706772"
+        }
+      }
+    },
+    {
+      "id": "24",
+      "label": "support",
+      "description": "Implement multi-model broadcast: `/agentmodel set <model>` to change workforce model for tasks in-flight and new tasks.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:44:30.706772",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:44:30.706772",
+          "notes": "Model switching broadcasts updates and dispatcher reads latest agent model per task."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:44:30.706772",
+          "notes": "Model command tests verify provider-qualified changes; integration run confirms tasks adopt updated model."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:44:30.706772"
+        }
+      }
+    },
+    {
+      "id": "25",
+      "label": "verify",
+      "description": "Produce a final summary report of all TODOs with PASS/FAIL and artifact links. Persist to /reports/final_verification.json.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T16:54:11.930583",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:54:11.930583",
+          "notes": "Final verification report aggregates TODO statuses and artifact references."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:54:11.930583",
+          "notes": "Report generator and CLI command validated in tests."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:54:11.930583"
+        }
+      }
+    }
+  ],
+  "artifacts": [
+    "/Users/ai/.agentforge/logs/system.log",
+    "/Users/ai/.agentforge/logs/verification.log",
+    "reports/loadtest.json"
+  ]
+}
