@@ -4,6 +4,8 @@ Command-line interface for AgentForge.
 
 from __future__ import annotations
 
+import json
+import time
 from datetime import datetime
 from typing import Optional
 
@@ -502,17 +504,57 @@ def preview(app: ForgeApp, task: str, context: tuple[str, ...]) -> None:
 
 
 @cli.command()
+@click.option("--follow/--no-follow", default=False, help="Stream logs and refresh stats continuously.")
+@click.option("--interval", default=5.0, show_default=True, type=float, help="Refresh interval in seconds when following.")
 @click.pass_obj
-def monitor(app: ForgeApp) -> None:
+def monitor(app: ForgeApp, follow: bool, interval: float) -> None:
     """Display current queue statistics."""
-    store = TaskStore(app.paths["task_db"])
+
+    def print_stats() -> None:
+        store = TaskStore(app.paths["task_db"])
+        try:
+            stats = store.stats()
+        finally:
+            store.close()
+        click.echo("Queue status:")
+        for key, value in stats.items():
+            click.echo(f"- {key}: {value}")
+
+    def stream_logs(position: int) -> int:
+        log_path = app.paths["system_log"]
+        if not log_path.exists():
+            return position
+        with log_path.open("r", encoding="utf-8") as fh:
+            fh.seek(position)
+            for line in fh:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    payload = json.loads(line)
+                except json.JSONDecodeError:
+                    click.echo(line)
+                    continue
+                timestamp = payload.get("timestamp", "")
+                level = payload.get("level", "INFO")
+                message = payload.get("message", "")
+                click.echo(f"[{timestamp}] {level}: {message}")
+            position = fh.tell()
+        return position
+
+    print_stats()
+    if not follow:
+        return
+
+    click.echo("--- Streaming system log (Ctrl+C to stop) ---")
+    position = 0
     try:
-        stats = store.stats()
-    finally:
-        store.close()
-    click.echo("Queue status:")
-    for key, value in stats.items():
-        click.echo(f"- {key}: {value}")
+        while True:
+            position = stream_logs(position)
+            time.sleep(max(interval, 0.5))
+            print_stats()
+    except KeyboardInterrupt:
+        click.echo("Stopping monitor.")
 
 
 @cli.command()
