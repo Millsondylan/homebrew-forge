@@ -604,9 +604,26 @@
       "id": "25",
       "label": "verify",
       "description": "Produce a final summary report of all TODOs with PASS/FAIL and artifact links. Persist to /reports/final_verification.json.",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T16:54:11.930583",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:54:11.930583",
+          "notes": "Final verification report aggregates TODO statuses and artifact references."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:54:11.930583",
+          "notes": "Report generator and CLI command validated in tests."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:54:11.930583"
+        }
+      }
     }
   ]
 }

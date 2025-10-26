@@ -32,6 +32,7 @@ from . import get_version
 from .oauth.flow import perform_pkce_oauth
 from .runtime.events import broadcast_model_change
 from .verification import export_verification_report
+from .reports import generate_final_report
 
 
 def _prompt_model_choice(models: list[str], label: str) -> str:
@@ -593,6 +594,15 @@ def verify_export(app: ForgeApp, output: Optional[Path]) -> None:
     """Export accumulated verification results to a timestamped JSON file."""
     report_path = export_verification_report(output)
     click.echo(f"Verification report written to {report_path}")
+
+
+@verify.command("final-report")
+@click.option("--output", type=click.Path(path_type=Path), default=Path("reports/final_verification.json"))
+@click.pass_obj
+def verify_final_report(app: ForgeApp, output: Path) -> None:
+    """Generate the final TODO summary report."""
+    report_path = generate_final_report(output)
+    click.echo(f"Final verification report written to {report_path}")
 
 
 @cli.command()
