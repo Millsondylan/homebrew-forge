@@ -54,9 +54,26 @@
       "id": "03",
       "label": "core",
       "description": "Implement `forge init` to create config, .env, and default directories (/agents, /logs, /db, /schedules).",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T15:01:34.423587",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:01:34.423587",
+          "notes": "forge init now provisions agents, logs, db, schedules directories and persists .env template."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:01:34.423587",
+          "notes": "CliRunner invocation confirmed workspace initialization under a temporary AGENTFORGE_HOME path."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T15:01:34.423587"
+        }
+      }
     },
     {
       "id": "04",

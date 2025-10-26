@@ -13,8 +13,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from . import constants
 from .config import load_config
-from .constants import TASK_DB
 from .logger import write_agent_log, write_system_log
 
 
@@ -227,7 +227,8 @@ class TaskStore:
 
 
 def run_task_loop(concurrency: int, agent_model: Optional[str] = None) -> None:
-    store = TaskStore(TASK_DB)
+    constants.refresh_paths()
+    store = TaskStore(constants.TASK_DB)
     config = load_config()
     agent_model = agent_model or config["agent_model"]
 

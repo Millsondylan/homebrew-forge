@@ -4,14 +4,15 @@ Scheduler helpers for AgentForge CLI.
 
 from __future__ import annotations
 
+import time
 from datetime import datetime, timedelta
 from typing import Optional
-import time
 
 import click
 
+from . import constants
 from .queue import TaskStore
-from .constants import TASK_DB, SCHEDULE_POLL_INTERVAL
+from .constants import SCHEDULE_POLL_INTERVAL
 from .logger import write_system_log
 
 
@@ -36,7 +37,8 @@ def parse_schedule_time(value: str) -> datetime:
 
 
 def add_scheduled_task(description: str, when: datetime) -> int:
-    store = TaskStore(TASK_DB)
+    constants.refresh_paths()
+    store = TaskStore(constants.TASK_DB)
     try:
         return store.add_scheduled_task(description, when)
     finally:
@@ -44,7 +46,8 @@ def add_scheduled_task(description: str, when: datetime) -> int:
 
 
 def release_due_tasks(limit: Optional[int] = None) -> int:
-    store = TaskStore(TASK_DB)
+    constants.refresh_paths()
+    store = TaskStore(constants.TASK_DB)
     try:
         return store.release_due_scheduled(limit=limit)
     finally:

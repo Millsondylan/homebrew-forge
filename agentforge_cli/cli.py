@@ -13,6 +13,7 @@ from typing import Optional
 import click
 from .config import (
     ensure_directories,
+    ensure_env_file,
     record_login,
     set_active_model,
     set_agent_model,
@@ -49,10 +50,17 @@ def cli(ctx: click.Context) -> None:
 def init(app: ForgeApp) -> None:
     """Initialise configuration, database, and log folders."""
     ensure_directories()
+    ensure_env_file()
     store = TaskStore(app.paths["task_db"])
     store.close()
     app.refresh()
-    click.echo(f"Configuration ready at {app.paths['config_root']}")
+    click.echo("AgentForge workspace initialised:")
+    click.echo(f"- config: {app.paths['config_file']}")
+    click.echo(f"- env: {app.paths['env_file']}")
+    click.echo(f"- agents: {app.paths['agents_dir']}")
+    click.echo(f"- database: {app.paths['task_db']}")
+    click.echo(f"- logs: {app.paths['log_dir']}")
+    click.echo(f"- schedules: {app.paths['schedules_dir']}")
 
 
 @cli.group()
