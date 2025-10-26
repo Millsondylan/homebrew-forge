@@ -77,6 +77,15 @@ DEFAULT_CONFIG: Dict[str, Any] = {
         "primary": {"provider": "anthropic", "name": constants.DEFAULT_MODELS[0]},
         "agent": {"provider": "anthropic", "name": constants.DEFAULT_MODELS[1]},
     },
+    "runtime": {
+        "default_concurrency": 10,
+        "max_concurrency": 500,
+        "autoscale": {
+            "enabled": True,
+            "scale_up_pending_per_worker": 2,
+            "scale_down_idle_cycles": 3,
+        },
+    },
 }
 
 
@@ -132,6 +141,10 @@ def load_config() -> Dict[str, Any]:
     merged.setdefault("models", DEFAULT_CONFIG["models"].copy())
     for key in ("primary", "agent"):
         merged["models"].setdefault(key, DEFAULT_CONFIG["models"][key].copy())
+    runtime_default = DEFAULT_CONFIG["runtime"].copy()
+    runtime_default["autoscale"] = DEFAULT_CONFIG["runtime"]["autoscale"].copy()
+    merged.setdefault("runtime", runtime_default)
+    merged["runtime"].setdefault("autoscale", runtime_default["autoscale"].copy())
     return merged
     return merged
 
@@ -198,6 +211,19 @@ def get_paths() -> Dict[str, Path]:
         "credentials_file": constants.CREDENTIALS_FILE,
         "credential_key_file": constants.CREDENTIAL_KEY_FILE,
     }
+
+
+def get_runtime_settings() -> Dict[str, Any]:
+    config = load_config()
+    runtime = config.get("runtime", {}).copy()
+    runtime.setdefault("default_concurrency", 10)
+    runtime.setdefault("max_concurrency", 500)
+    autoscale = runtime.get("autoscale", {}).copy()
+    autoscale.setdefault("enabled", True)
+    autoscale.setdefault("scale_up_pending_per_worker", 2)
+    autoscale.setdefault("scale_down_idle_cycles", 3)
+    runtime["autoscale"] = autoscale
+    return runtime
 
 
 def export_state() -> str:

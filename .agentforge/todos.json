@@ -179,9 +179,26 @@
       "id": "08",
       "label": "core",
       "description": "Implement agent worker pool and dispatcher capable of N concurrent agents (configurable). Begin with default N=10; include autoscaling hooks to reach 500 in v2 tests.",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T15:45:13.712562",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:45:13.712562",
+          "notes": "AgentDispatcher manages worker pool with autoscaling hooks up to configured max concurrency."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:45:13.712562",
+          "notes": "Cli queue run exercised via pytest dispatcher tests to ensure tasks complete under autoscaling."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T15:45:13.712562"
+        }
+      }
     },
     {
       "id": "09",

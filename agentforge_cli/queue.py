@@ -7,15 +7,15 @@ from __future__ import annotations
 import sqlite3
 import threading
 import time
-from concurrent.futures import ThreadPoolExecutor, wait
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
 
 from . import constants
-from .config import load_config
+from .config import get_runtime_settings, load_config
 from .logger import write_agent_log, write_system_log
+from .runtime.dispatcher import AgentDispatcher
 
 
 CREATE_TASKS_SQL = """
@@ -225,32 +225,35 @@ class TaskStore:
             "failed": failed,
         }
 
+    def pending_count(self) -> int:
+        with self.lock:
+            return self.conn.execute("SELECT COUNT(*) FROM tasks WHERE status = 'pending'").fetchone()[0]
 
-def run_task_loop(concurrency: int, agent_model: Optional[str] = None) -> None:
+
+def run_task_loop(concurrency: int, agent_model: Optional[str] = None, autoscale: Optional[bool] = None) -> None:
     constants.refresh_paths()
     store = TaskStore(constants.TASK_DB)
     config = load_config()
     agent_defaults = config.get("models", {}).get("agent", {})
-    agent_model = agent_model or agent_defaults.get("name", config["agent_model"])
+    resolved_model = agent_model or agent_defaults.get("name", config["agent_model"])
+    runtime = get_runtime_settings()
+    autoscale_cfg = runtime.get("autoscale", {})
+    autoscale_enabled = autoscale if autoscale is not None else autoscale_cfg.get("enabled", True)
+    autoscale_state = AgentDispatcher._build_autoscale_state(runtime) if autoscale_enabled else None
 
-    def worker(worker_id: int) -> None:
-        while True:
-            task = store.claim_task()
-            if not task:
-                break
-            write_agent_log(worker_id, f"Task {task.id} claimed ({task.description}) using model {agent_model}")
-            try:
-                _process_task(worker_id, store, task, agent_model)
-            except Exception as exc:  # pragma: no cover
-                store.fail_task(task.id, str(exc))
-                write_agent_log(worker_id, f"Task {task.id} failed: {exc}")
-        write_agent_log(worker_id, "Idle - no pending tasks")
+    dispatcher = AgentDispatcher(
+        store=store,
+        agent_model=resolved_model,
+        process=_process_task,
+        initial_concurrency=concurrency or runtime.get("default_concurrency", 10),
+        autoscale=autoscale_state,
+    )
 
-    with ThreadPoolExecutor(max_workers=concurrency) as executor:
-        futures = [executor.submit(worker, idx + 1) for idx in range(concurrency)]
-        wait(futures)
-    store.close()
-    write_system_log("Queue run completed.")
+    try:
+        dispatcher.run()
+    finally:
+        store.close()
+        write_system_log("Queue run completed.")
 
 
 def _process_task(worker_id: int, store: TaskStore, task: Task, agent_model: str) -> None:

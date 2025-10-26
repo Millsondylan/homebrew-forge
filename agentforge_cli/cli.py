@@ -328,12 +328,15 @@ def list(app: ForgeApp, limit: Optional[int]) -> None:  # type: ignore[override]
 
 
 @queue.command()
-@click.option("--concurrency", default=1, show_default=True, type=int)
+@click.option("--concurrency", default=None, type=int, help="Target worker count (defaults to runtime setting).")
+@click.option("--autoscale/--no-autoscale", default=None, help="Enable or disable autoscaling for this run.")
 @click.pass_obj
-def run(app: ForgeApp, concurrency: int) -> None:
+def run(app: ForgeApp, concurrency: Optional[int], autoscale: Optional[bool]) -> None:
     """Process tasks with the configured agent workforce."""
     init_logging()
-    run_task_loop(concurrency=concurrency)
+    runtime = app.config.get("runtime", {})
+    target = concurrency or runtime.get("default_concurrency", 10)
+    run_task_loop(concurrency=target, autoscale=autoscale)
 
 
 @cli.group()
@@ -347,11 +350,14 @@ def agent(ctx: click.Context) -> None:
 @agent.command()
 @click.argument("number", type=int)
 @click.option("--model", default=None, help="Override agent model for this run.")
+@click.option("--autoscale", is_flag=True, help="Enable autoscaling up to the configured maximum.")
 @click.pass_obj
-def spawn(app: ForgeApp, number: int, model: Optional[str]) -> None:
+def spawn(app: ForgeApp, number: int, model: Optional[str], autoscale: bool) -> None:
     """Spawn worker agents to pull from the queue."""
     init_logging()
-    run_task_loop(concurrency=number, agent_model=model)
+    runtime = app.config.get("runtime", {})
+    target = number or runtime.get("default_concurrency", 10)
+    run_task_loop(concurrency=target, agent_model=model, autoscale=autoscale)
 
 
 @agent.group()
