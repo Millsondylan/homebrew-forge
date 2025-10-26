@@ -104,9 +104,26 @@
       "id": "05",
       "label": "core",
       "description": "Implement `forge auth anthropic --api-key <key>` and `forge auth anthropic --oauth` that opens the system browser to start OAuth and captures tokens locally (store tokens encrypted in ~/.agentforge/credentials.json).",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T15:23:46.206076",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:23:46.206076",
+          "notes": "CLI now supports --api-key and --oauth for Anthropic with credential vault integration."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:23:46.206076",
+          "notes": "CliRunner exercised auth command and tests patched OAuth flow to ensure persisted tokens."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T15:23:46.206076"
+        }
+      }
     },
     {
       "id": "06",

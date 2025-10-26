@@ -4,13 +4,11 @@ Command-line interface for AgentForge.
 
 from __future__ import annotations
 
-import shutil
-import subprocess
-import webbrowser
 from datetime import datetime
 from typing import Optional
 
 import click
+from requests import HTTPError
 from .config import (
     ensure_directories,
     ensure_env_file,
@@ -21,11 +19,12 @@ from .config import (
     export_state,
 )
 from .app import ForgeApp
-from .constants import ANTHROPIC_LOGIN_URL, DEFAULT_MODELS
+from .constants import DEFAULT_MODELS
 from .logger import init_logging, write_system_log
 from .queue import TaskStore, run_task_loop
 from .scheduler import add_scheduled_task, parse_schedule_time, run_schedule_loop
 from . import get_version
+from .oauth.flow import perform_pkce_oauth
 
 
 def _prompt_model_choice(models: list[str], label: str) -> str:
@@ -72,29 +71,91 @@ def auth(ctx: click.Context) -> None:
 
 
 @auth.command()
+@click.option("--api-key", "api_key", type=str, help="Store an Anthropic API key.")
+@click.option("--oauth", is_flag=True, help="Authenticate with Anthropic OAuth in the browser.")
+@click.option("--client-id", type=str, help="Override OAuth client ID.")
+@click.option("--redirect-uri", type=str, help="Override OAuth redirect URI.")
+@click.option("--no-browser", is_flag=True, help="Do not launch the browser automatically.")
+@click.option("--auth-code", type=str, help="Provide an authorization code manually (bypass listener).")
 @click.pass_obj
-def anthropic(app: ForgeApp) -> None:
-    """Launch browser login for Anthropic."""
-    anthropic_cli = shutil.which("anthropic")
-    if anthropic_cli:
-        click.echo("Starting Anthropic CLI login flow…")
+def anthropic(
+    app: ForgeApp,
+    api_key: Optional[str],
+    oauth: bool,
+    client_id: Optional[str],
+    redirect_uri: Optional[str],
+    no_browser: bool,
+    auth_code: Optional[str],
+) -> None:
+    """Manage Anthropic authentication (API key or OAuth)."""
+
+    manager = app.auth()
+    action_taken = False
+
+    if api_key:
+        manager.store_api_key("anthropic", api_key)
+        record_login(datetime.utcnow())
+        app.refresh()
+        write_system_log("Anthropic API key stored through AgentForge")
+        click.echo("Anthropic API key stored securely in the credential vault.")
+        action_taken = True
+
+    if oauth:
+        action_taken = True
         try:
-            subprocess.run([anthropic_cli, "login"], check=True)
-            record_login(datetime.utcnow())
-            write_system_log("Anthropic CLI login completed")
-            click.echo("Anthropic login completed. Credentials cached by Anthropic tooling.")
-            app.refresh()
-            return
-        except subprocess.CalledProcessError as exc:  # pragma: no cover - external dependency
-            write_system_log(f"Anthropic CLI login failed: {exc}")
-            click.echo("Anthropic CLI login failed, falling back to direct browser flow.")
-    login_url = app.config.get("anthropic_login_url", ANTHROPIC_LOGIN_URL)
-    click.echo("Opening browser for Anthropic login…")
-    webbrowser.open(login_url, new=1)
-    record_login(datetime.utcnow())
-    app.refresh()
-    write_system_log("Anthropic login triggered via direct browser flow")
-    click.echo("Complete the Anthropic login in your browser to finish authentication.")
+            metadata = manager.oauth_metadata("anthropic")
+        except ValueError as exc:
+            raise click.ClickException(str(exc)) from exc
+
+        resolved_client_id = client_id or metadata.client_id
+        if not resolved_client_id:
+            resolved_client_id = click.prompt("Enter the Anthropic OAuth client ID", type=str)
+
+        authorize_extra = dict(metadata.extra_params)
+        if redirect_uri:
+            authorize_extra.pop("redirect_uri", None)
+        else:
+            redirect_uri = metadata.extra_params.get("redirect_uri")
+
+        try:
+            oauth_payload = perform_pkce_oauth(
+                authorize_url=metadata.authorize_url,
+                token_url=metadata.token_url,
+                client_id=resolved_client_id,
+                scopes=metadata.scopes,
+                redirect_uri=redirect_uri,
+                extra_authorize_params=authorize_extra,
+                open_browser=not no_browser,
+                manual_code=auth_code,
+                audience=metadata.audience,
+            )
+        except (TimeoutError, ValueError) as exc:
+            if auth_code:
+                raise click.ClickException(str(exc)) from exc
+            click.echo(f"Automatic redirect capture failed: {exc}")
+            manual_code = click.prompt("Paste the authorization code provided by Anthropic", type=str)
+            oauth_payload = perform_pkce_oauth(
+                authorize_url=metadata.authorize_url,
+                token_url=metadata.token_url,
+                client_id=resolved_client_id,
+                scopes=metadata.scopes,
+                redirect_uri=redirect_uri,
+                extra_authorize_params=authorize_extra,
+                open_browser=False,
+                manual_code=manual_code,
+                audience=metadata.audience,
+            )
+        except HTTPError as exc:  # pragma: no cover - network errors
+            raise click.ClickException(f"Token exchange failed: {exc.response.text if exc.response else exc}") from exc
+
+        manager.persist_oauth_tokens("anthropic", oauth_payload)
+        record_login(datetime.utcnow())
+        app.refresh()
+        write_system_log("Anthropic OAuth tokens stored via AgentForge")
+        click.echo("Anthropic OAuth tokens stored. Refresh tokens are encrypted at rest.")
+
+    if not action_taken:
+        raise click.UsageError("Specify --api-key or --oauth to select an authentication method.")
 
 
 @auth.command()
@@ -121,7 +182,7 @@ def gemini(app: ForgeApp, api_key: str) -> None:
 @click.pass_context
 def slash_login(ctx: click.Context) -> None:
     """Slash command wrapper for anthropic auth."""
-    ctx.invoke(anthropic)
+    ctx.invoke(anthropic, oauth=True)
 
 
 @cli.command(name="/model")
