@@ -230,7 +230,8 @@ def run_task_loop(concurrency: int, agent_model: Optional[str] = None) -> None:
     constants.refresh_paths()
     store = TaskStore(constants.TASK_DB)
     config = load_config()
-    agent_model = agent_model or config["agent_model"]
+    agent_defaults = config.get("models", {}).get("agent", {})
+    agent_model = agent_model or agent_defaults.get("name", config["agent_model"])
 
     def worker(worker_id: int) -> None:
         while True:

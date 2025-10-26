@@ -154,9 +154,26 @@
       "id": "07",
       "label": "core",
       "description": "Implement `forge model set <provider>:<model>` that updates runtime config and broadcasts model-change to active agents.",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T15:32:28.284838",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:32:28.284838",
+          "notes": "forge model set now accepts provider:model syntax and updates config with provider mapping."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T15:32:28.284838",
+          "notes": "Model set command invoked via CliRunner and model event log captured broadcast."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T15:32:28.284838"
+        }
+      }
     },
     {
       "id": "08",

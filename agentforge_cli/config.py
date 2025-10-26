@@ -9,7 +9,7 @@ import os
 import textwrap
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import yaml
 
@@ -60,6 +60,22 @@ DEFAULT_CONFIG: Dict[str, Any] = {
             }
         },
         "local": {},
+    },
+    "model_catalog": {
+        "anthropic": constants.DEFAULT_MODELS,
+        "gemini": [
+            "gemini-1.5-pro",
+            "gemini-1.5-flash",
+        ],
+        "ollama": [
+            "llama3:70b",
+            "llama3:8b",
+        ],
+        "local": [],
+    },
+    "models": {
+        "primary": {"provider": "anthropic", "name": constants.DEFAULT_MODELS[0]},
+        "agent": {"provider": "anthropic", "name": constants.DEFAULT_MODELS[1]},
     },
 }
 
@@ -112,6 +128,11 @@ def load_config() -> Dict[str, Any]:
     # Ensure required keys exist
     merged = DEFAULT_CONFIG.copy()
     merged.update(data)
+    merged.setdefault("model_catalog", DEFAULT_CONFIG["model_catalog"].copy())
+    merged.setdefault("models", DEFAULT_CONFIG["models"].copy())
+    for key in ("primary", "agent"):
+        merged["models"].setdefault(key, DEFAULT_CONFIG["models"][key].copy())
+    return merged
     return merged
 
 
@@ -129,18 +150,27 @@ def record_login(timestamp: datetime | None = None) -> None:
     save_config(config)
 
 
-def set_active_model(model_name: str) -> None:
+def _ensure_model_available(config: Dict[str, Any], provider: str, model_name: str) -> None:
+    catalog = config.get("model_catalog", {})
+    options = catalog.get(provider, [])
+    if model_name not in options:
+        raise ValueError(f"Unknown model '{model_name}' for provider '{provider}'.")
+
+
+def set_active_model(model_name: str, provider: Optional[str] = None) -> None:
     config = load_config()
-    if model_name not in config["available_models"]:
-        raise ValueError(f"Unknown model '{model_name}'.")
+    chosen_provider = provider or config.get("models", {}).get("primary", {}).get("provider", "anthropic")
+    _ensure_model_available(config, chosen_provider, model_name)
+    config.setdefault("models", {})["primary"] = {"provider": chosen_provider, "name": model_name}
     config["active_model"] = model_name
     save_config(config)
 
 
-def set_agent_model(model_name: str) -> None:
+def set_agent_model(model_name: str, provider: Optional[str] = None) -> None:
     config = load_config()
-    if model_name not in config["available_models"]:
-        raise ValueError(f"Unknown model '{model_name}'.")
+    chosen_provider = provider or config.get("models", {}).get("agent", {}).get("provider", "anthropic")
+    _ensure_model_available(config, chosen_provider, model_name)
+    config.setdefault("models", {})["agent"] = {"provider": chosen_provider, "name": model_name}
     config["agent_model"] = model_name
     save_config(config)
 

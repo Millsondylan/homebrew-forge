@@ -25,6 +25,7 @@ from .queue import TaskStore, run_task_loop
 from .scheduler import add_scheduled_task, parse_schedule_time, run_schedule_loop
 from . import get_version
 from .oauth.flow import perform_pkce_oauth
+from .runtime.events import broadcast_model_change
 
 
 def _prompt_model_choice(models: list[str], label: str) -> str:
@@ -33,6 +34,27 @@ def _prompt_model_choice(models: list[str], label: str) -> str:
         click.echo(f"  {idx}. {model}")
     choice = click.prompt(f"Select {label} by number", type=click.IntRange(1, len(models)))
     return models[choice - 1]
+
+
+def _prompt_provider(app: ForgeApp, prompt: str) -> str:
+    catalog = app.config.get("model_catalog", {})
+    providers = sorted(catalog.keys())
+    if not providers:
+        raise click.ClickException("No providers defined in model catalog")
+    click.echo(prompt)
+    for idx, provider in enumerate(providers, start=1):
+        click.echo(f"  {idx}. {provider}")
+    choice = click.prompt("Select provider", type=click.IntRange(1, len(providers)))
+    return providers[choice - 1]
+
+
+def _parse_provider_model(value: str, fallback_provider: Optional[str]) -> tuple[str, str]:
+    if ":" in value:
+        provider, model = value.split(":", 1)
+        return provider.strip(), model.strip()
+    if not fallback_provider:
+        raise click.BadParameter("Provider must be specified as provider:model")
+    return fallback_provider, value.strip()
 
 
 @click.group(context_settings={"help_option_names": ["-h", "--help"]})
@@ -189,22 +211,28 @@ def slash_login(ctx: click.Context) -> None:
 @click.pass_obj
 def slash_model(app: ForgeApp) -> None:
     """Slash command to pick the primary model."""
-    models = app.config.get("available_models", DEFAULT_MODELS)
-    chosen = _prompt_model_choice(models, "models")
-    set_active_model(chosen)
+    provider = _prompt_provider(app, "Select provider for primary model:")
+    catalog = app.config.get("model_catalog", {})
+    models = catalog.get(provider, DEFAULT_MODELS)
+    chosen = _prompt_model_choice(models, f"{provider} models")
+    set_active_model(chosen, provider)
     app.refresh()
-    click.echo(f"Primary model set to {chosen}")
+    broadcast_model_change("primary", provider, chosen)
+    click.echo(f"Primary model set to {provider}:{chosen}")
 
 
 @cli.command(name="/agentmodel")
 @click.pass_obj
 def slash_agent_model(app: ForgeApp) -> None:
     """Slash command to update the workforce agent model."""
-    models = app.config.get("available_models", DEFAULT_MODELS)
-    chosen = _prompt_model_choice(models, "agent models")
-    set_agent_model(chosen)
+    provider = _prompt_provider(app, "Select provider for agent workforce model:")
+    catalog = app.config.get("model_catalog", {})
+    models = catalog.get(provider, DEFAULT_MODELS)
+    chosen = _prompt_model_choice(models, f"{provider} models")
+    set_agent_model(chosen, provider)
     app.refresh()
-    click.echo(f"Agent workforce model set to {chosen}")
+    broadcast_model_change("agent", provider, chosen)
+    click.echo(f"Agent workforce model set to {provider}:{chosen}")
 
 
 @cli.group()
@@ -218,27 +246,36 @@ def model(ctx: click.Context) -> None:
 @model.command()
 @click.pass_obj
 def list(app: ForgeApp) -> None:  # type: ignore[override]
-    """List available models."""
-    active = app.config["active_model"]
-    agent_model = app.config["agent_model"]
-    for model_name in app.config["available_models"]:
-        marker = []
-        if model_name == active:
-            marker.append("active")
-        if model_name == agent_model:
-            marker.append("agent")
-        suffix = f" ({', '.join(marker)})" if marker else ""
-        click.echo(f"- {model_name}{suffix}")
+    """List available models grouped by provider."""
+    catalog = app.config.get("model_catalog", {})
+    primary = app.config.get("models", {}).get("primary", {})
+    agent_model = app.config.get("models", {}).get("agent", {})
+    for provider, models in catalog.items():
+        click.echo(f"{provider}:")
+        for model_name in models:
+            marker = []
+            if provider == primary.get("provider") and model_name == primary.get("name"):
+                marker.append("primary")
+            if provider == agent_model.get("provider") and model_name == agent_model.get("name"):
+                marker.append("agent")
+            suffix = f" ({', '.join(marker)})" if marker else ""
+            click.echo(f"  - {model_name}{suffix}")
 
 
 @model.command()
-@click.argument("model_name")
+@click.argument("target")
 @click.pass_obj
-def set(app: ForgeApp, model_name: str) -> None:
-    """Set the active model."""
-    set_active_model(model_name)
+def set(app: ForgeApp, target: str) -> None:
+    """Set the active model using provider:model syntax."""
+    current_provider = app.config.get("models", {}).get("primary", {}).get("provider")
+    provider, model_name = _parse_provider_model(target, current_provider)
+    try:
+        set_active_model(model_name, provider)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
     app.refresh()
-    click.echo(f"Primary model set to {model_name}")
+    broadcast_model_change("primary", provider, model_name)
+    click.echo(f"Primary model set to {provider}:{model_name}")
 
 
 @model.command()
@@ -286,7 +323,7 @@ def list(app: ForgeApp, limit: Optional[int]) -> None:  # type: ignore[override]
     for task in tasks:
         click.echo(
             f"#{task.id} [{task.status}] {task.description} "
-            f"(agent_model={task.agent_model or app.config['agent_model']})"
+            f"(agent_model={task.agent_model or app.config.get('models', {}).get('agent', {}).get('name', app.config['agent_model'])})"
         )
 
 
@@ -329,7 +366,10 @@ def model(ctx: click.Context) -> None:
 @click.pass_obj
 def agent_model_show(app: ForgeApp) -> None:
     """Show the current workforce model."""
-    click.echo(app.config["agent_model"])
+    agent_cfg = app.config.get("models", {}).get("agent", {})
+    provider = agent_cfg.get("provider", "anthropic")
+    model_name = agent_cfg.get("name", app.config.get("agent_model"))
+    click.echo(f"{provider}:{model_name}")
 
 
 @model.command("set")
@@ -337,9 +377,15 @@ def agent_model_show(app: ForgeApp) -> None:
 @click.pass_obj
 def agent_model_set(app: ForgeApp, model_name: str) -> None:
     """Set the workforce model for spawned agents."""
-    set_agent_model(model_name)
+    current_provider = app.config.get("models", {}).get("agent", {}).get("provider")
+    provider, resolved = _parse_provider_model(model_name, current_provider)
+    try:
+        set_agent_model(resolved, provider)
+    except ValueError as exc:
+        raise click.ClickException(str(exc)) from exc
     app.refresh()
-    click.echo(f"Agent workforce model set to {model_name}")
+    broadcast_model_change("agent", provider, resolved)
+    click.echo(f"Agent workforce model set to {provider}:{resolved}")
 
 
 @cli.group()
