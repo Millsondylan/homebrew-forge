@@ -22,6 +22,7 @@ from .config import (
 )
 from .app import ForgeApp
 from .constants import DEFAULT_MODELS
+from .dashboard import run_dashboard
 from .logger import init_logging, write_system_log
 from .memory import default_memory_store
 from .queue import TaskStore, run_task_loop
@@ -555,6 +556,24 @@ def monitor(app: ForgeApp, follow: bool, interval: float) -> None:
             print_stats()
     except KeyboardInterrupt:
         click.echo("Stopping monitor.")
+
+
+@cli.command()
+@click.option("--host", default="127.0.0.1", show_default=True)
+@click.option("--port", default=8765, show_default=True, type=int)
+@click.pass_obj
+def dashboard(app: ForgeApp, host: str, port: int) -> None:
+    """Serve a lightweight dashboard for queue stats and model controls."""
+    server = run_dashboard(host, port)
+    actual_port = server.server_address[1]
+    click.echo(f"Dashboard available at http://{host}:{actual_port}")
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        click.echo("Shutting down dashboard…")
+        server.shutdown()
+    finally:
+        server.server_close()
 
 
 @cli.command()
