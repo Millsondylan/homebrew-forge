@@ -229,9 +229,26 @@
       "id": "10",
       "label": "core",
       "description": "Implement scheduler to add tasks to queue at specified times with cron-like syntax.",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T16:03:45.635625",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:03:45.635625",
+          "notes": "Scheduler now supports cron expressions, timezones, and recurring runs with max-runs limits."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:03:45.635625",
+          "notes": "Scheduler tests confirmed cron rescheduling and completion behavior."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:03:45.635625"
+        }
+      }
     },
     {
       "id": "11",

@@ -424,13 +424,24 @@ def schedule(ctx: click.Context) -> None:
 
 @schedule.command()
 @click.argument("task_description")
-@click.argument("when")
+@click.argument("when", required=False)
+@click.option("--cron", "cron_expression", default=None, help="Cron expression for recurring schedule.")
+@click.option("--timezone", default="UTC", show_default=True, help="Timezone for parsing ISO or cron triggers.")
+@click.option("--max-runs", type=int, default=None, help="Maximum runs for a cron schedule before completion.")
 @click.pass_obj
-def add(app: ForgeApp, task_description: str, when: str) -> None:
+def add(
+    app: ForgeApp,
+    task_description: str,
+    when: Optional[str],
+    cron_expression: Optional[str],
+    timezone: str,
+    max_runs: Optional[int],
+) -> None:
     """Schedule a task for later execution."""
-    parsed = parse_schedule_time(when)
-    task_id = add_scheduled_task(task_description, parsed)
-    click.echo(f"Scheduled task {task_id} for {parsed.isoformat()}")
+    spec = parse_schedule_time(when, cron=cron_expression, tz=timezone, max_runs=max_runs)
+    task_id = add_scheduled_task(task_description, spec)
+    suffix = f" (cron: {spec.cron_expression})" if spec.cron_expression else ""
+    click.echo(f"Scheduled task {task_id} for {spec.run_at.isoformat()}{suffix}")
 
 
 @schedule.command()

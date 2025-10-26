@@ -12,6 +12,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from croniter import croniter
+
 from . import constants
 from .config import get_runtime_settings, load_config
 from .logger import write_agent_log, write_system_log
@@ -42,7 +44,12 @@ CREATE TABLE IF NOT EXISTS scheduled_tasks (
     description TEXT NOT NULL,
     scheduled_for TEXT NOT NULL,
     created_at TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'pending'
+    status TEXT NOT NULL DEFAULT 'pending',
+    cron_expression TEXT,
+    timezone TEXT,
+    run_count INTEGER NOT NULL DEFAULT 0,
+    max_runs INTEGER,
+    last_run TEXT
 );
 """
 
@@ -84,6 +91,7 @@ class TaskStore:
         self.conn.execute(CREATE_TASKS_SQL)
         self.conn.execute(CREATE_SCHEDULE_SQL)
         self._ensure_columns()
+        self._ensure_schedule_columns()
         for statement in CREATE_TASK_INDEXES:
             self.conn.execute(statement)
         self.conn.commit()
@@ -103,6 +111,22 @@ class TaskStore:
             migrations.append("ALTER TABLE tasks ADD COLUMN priority INTEGER NOT NULL DEFAULT 0")
         if "last_error" not in existing:
             migrations.append("ALTER TABLE tasks ADD COLUMN last_error TEXT")
+        for statement in migrations:
+            self.conn.execute(statement)
+
+    def _ensure_schedule_columns(self) -> None:
+        existing = {row[1] for row in self.conn.execute("PRAGMA table_info(scheduled_tasks)")}
+        migrations = []
+        if "cron_expression" not in existing:
+            migrations.append("ALTER TABLE scheduled_tasks ADD COLUMN cron_expression TEXT")
+        if "timezone" not in existing:
+            migrations.append("ALTER TABLE scheduled_tasks ADD COLUMN timezone TEXT")
+        if "run_count" not in existing:
+            migrations.append("ALTER TABLE scheduled_tasks ADD COLUMN run_count INTEGER NOT NULL DEFAULT 0")
+        if "max_runs" not in existing:
+            migrations.append("ALTER TABLE scheduled_tasks ADD COLUMN max_runs INTEGER")
+        if "last_run" not in existing:
+            migrations.append("ALTER TABLE scheduled_tasks ADD COLUMN last_run TEXT")
         for statement in migrations:
             self.conn.execute(statement)
 
@@ -272,15 +296,31 @@ class TaskStore:
                 )
             self.conn.commit()
 
-    def add_scheduled_task(self, description: str, scheduled_for: datetime) -> int:
+    def add_scheduled_task(
+        self,
+        description: str,
+        scheduled_for: datetime,
+        *,
+        cron_expression: Optional[str] = None,
+        timezone: Optional[str] = None,
+        max_runs: Optional[int] = None,
+    ) -> int:
         now = datetime.utcnow().isoformat()
         with self.lock:
             cur = self.conn.execute(
                 """
-                INSERT INTO scheduled_tasks (description, scheduled_for, created_at, status)
-                VALUES (?, ?, ?, 'pending')
+                INSERT INTO scheduled_tasks (
+                    description,
+                    scheduled_for,
+                    created_at,
+                    status,
+                    cron_expression,
+                    timezone,
+                    max_runs
+                )
+                VALUES (?, ?, ?, 'pending', ?, ?, ?)
                 """,
-                (description, scheduled_for.isoformat(), now),
+                (description, scheduled_for.isoformat(), now, cron_expression, timezone, max_runs),
             )
             self.conn.commit()
             task_id = cur.lastrowid
@@ -292,7 +332,8 @@ class TaskStore:
         with self.lock:
             cur = self.conn.execute(
                 """
-                SELECT id, description FROM scheduled_tasks
+                SELECT id, description, cron_expression, timezone, run_count, max_runs, scheduled_for
+                FROM scheduled_tasks
                 WHERE status = 'pending' AND scheduled_for <= ?
                 ORDER BY scheduled_for
                 """,
@@ -303,30 +344,81 @@ class TaskStore:
                 return 0
             count = 0
             for row in rows:
-                self.conn.execute(
-                    "UPDATE scheduled_tasks SET status = 'released' WHERE id = ?",
-                    (row["id"],),
-                )
-                self.conn.execute(
-                    """
-                    INSERT INTO tasks (
-                        description,
-                        status,
-                        created_at,
-                        updated_at,
-                        agent_model,
-                        result,
-                        attempts,
-                        max_attempts,
-                        available_at,
-                        idempotency_key,
-                        priority,
-                        last_error
+                cron_expression = row["cron_expression"]
+                release_description = row["description"]
+                if cron_expression:
+                    self.conn.execute(
+                        """
+                        INSERT INTO tasks (
+                            description,
+                            status,
+                            created_at,
+                            updated_at,
+                            agent_model,
+                            result,
+                            attempts,
+                            max_attempts,
+                            available_at,
+                            idempotency_key,
+                            priority,
+                            last_error
+                        )
+                        VALUES (?, 'pending', ?, ?, NULL, NULL, 0, 3, ?, NULL, 0, NULL)
+                        """,
+                        (release_description, now, now, now),
                     )
-                    VALUES (?, 'pending', ?, ?, NULL, NULL, 0, 3, ?, NULL, 0, NULL)
-                    """,
-                    (row["description"], now, now, now),
-                )
+                    next_base = datetime.fromisoformat(row["scheduled_for"])
+                    iterator = croniter(cron_expression, next_base)
+                    next_time = iterator.get_next(datetime)
+                    run_count = row["run_count"] + 1
+                    max_runs = row["max_runs"]
+                    if max_runs is not None and run_count >= max_runs:
+                        self.conn.execute(
+                            """
+                            UPDATE scheduled_tasks
+                            SET status = 'completed', run_count = ?, last_run = ?, scheduled_for = ?
+                            WHERE id = ?
+                            """,
+                            (run_count, now, next_time.isoformat(), row["id"]),
+                        )
+                    else:
+                        self.conn.execute(
+                            """
+                            UPDATE scheduled_tasks
+                            SET run_count = ?, last_run = ?, scheduled_for = ?
+                            WHERE id = ?
+                            """,
+                            (run_count, now, next_time.isoformat(), row["id"]),
+                        )
+                else:
+                    self.conn.execute(
+                        "UPDATE scheduled_tasks SET status = 'released' WHERE id = ?",
+                        (row["id"],),
+                    )
+                    self.conn.execute(
+                        """
+                        INSERT INTO tasks (
+                            description,
+                            status,
+                            created_at,
+                            updated_at,
+                            agent_model,
+                            result,
+                            attempts,
+                            max_attempts,
+                            available_at,
+                            idempotency_key,
+                            priority,
+                            last_error
+                        )
+                        VALUES (?, 'pending', ?, ?, NULL, NULL, 0, 3, ?, NULL, 0, NULL)
+                        """,
+                        (release_description, now, now, now),
+                    )
+                    self.conn.execute(
+                        "UPDATE scheduled_tasks SET last_run = ? WHERE id = ?",
+                        (now, row["id"]),
+                    )
                 count += 1
                 if limit and count >= limit:
                     break
