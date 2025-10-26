@@ -20,6 +20,7 @@ from .logger import write_agent_log, write_system_log
 from .memory import default_memory_store
 from .prompts import default_prompt_manager
 from .runtime.dispatcher import AgentDispatcher, AutoscaleState
+from .verification import VerificationManager
 
 
 CREATE_TASKS_SQL = """
@@ -529,39 +530,60 @@ def _process_task(worker_id: int, store: TaskStore, task: Task, agent_model: str
     # Simulate work
     time.sleep(0.5)
     # Logical verification
-    logical_ok = bool(task.description.strip())
-    write_agent_log(worker_id, f"Task {task.id}: Logical verification {'PASSED' if logical_ok else 'FAILED'}")
-    if not logical_ok:
-        store.fail_task(task, "Logical verification failed: empty description")
+    agent_identifier = f"agent-{worker_id:03d}"
+    verifier = VerificationManager()
+    logical_result = verifier.logical(task.id, agent_identifier, task.description)
+    write_agent_log(
+        worker_id,
+        f"Task {task.id}: Logical verification {'PASSED' if logical_result.passed else 'FAILED'}",
+    )
+    if not logical_result.passed:
+        store.fail_task(task, logical_result.details)
         write_agent_log(
             worker_id,
-            f"Task {task.id}: Logical verification failed (attempt {task.attempts}/{task.max_attempts})",
+            f"Task {task.id}: Aborted due to logical verification failure",
         )
         return
     # Empirical verification (simulated)
     time.sleep(0.2)
-    empirical_ok = True
-    write_agent_log(worker_id, f"Task {task.id}: Empirical verification {'PASSED' if empirical_ok else 'FAILED'}")
+    result_message = f"Completed with {agent_model}"
+    memory_entry_id: Optional[int] = None
+    try:
+        with default_memory_store() as memory_store:
+            memory_entry_id = memory_store.add_memory(
+                agent_id=agent_identifier,
+                content=f"Task {task.id}: {task.description} -> {result_message}",
+                metadata={
+                    "task_id": task.id,
+                    "agent_model": agent_model,
+                    "attempts": task.attempts,
+                },
+            )
+        write_agent_log(worker_id, f"Task {task.id}: Memory recorded (entry {memory_entry_id})")
+    except Exception as exc:  # pragma: no cover - best effort
+        write_system_log(f"Memory store error for task {task.id}: {exc}")
 
-    if empirical_ok:
-        result_message = f"Completed with {agent_model}"
-        store.complete_task(task.id, result_message)
-        write_agent_log(worker_id, f"Task {task.id}: PASSED ✔ ({result_message})")
+    def empirical_runner() -> tuple[bool, str]:
         try:
             with default_memory_store() as memory_store:
-                memory_store.add_memory(
-                    agent_id=f"agent-{worker_id:03d}",
-                    content=f"Task {task.id}: {task.description} -> {result_message}",
-                    metadata={
-                        "task_id": task.id,
-                        "agent_model": agent_model,
-                        "attempts": task.attempts,
-                    },
-                )
-        except Exception as exc:  # pragma: no cover - best effort
-            write_system_log(f"Memory store error for task {task.id}: {exc}")
-    else:  # pragma: no cover
-        store.fail_task(task, "Empirical verification failed")
+                results = memory_store.search(task.description, limit=1, agent_id=agent_identifier)
+        except Exception as exc:  # pragma: no cover
+            return False, f"Memory search failed: {exc}"
+        if results:
+            return True, f"Memory entry located (id={results[0].id})."
+        return False, "Memory entry not found after execution."
+
+    empirical_result = verifier.empirical(task.id, agent_identifier, empirical_runner)
+    write_agent_log(
+        worker_id,
+        f"Task {task.id}: Empirical verification {'PASSED' if empirical_result.passed else 'FAILED'}",
+    )
+
+    if empirical_result.passed:
+        store.complete_task(task.id, result_message)
+        write_agent_log(worker_id, f"Task {task.id}: PASSED ✔ ({result_message})")
+    else:
+        store.fail_task(task, empirical_result.details)
         write_agent_log(
             worker_id,
             f"Task {task.id}: FAILED during empirical verification (attempt {task.attempts}/{task.max_attempts})",

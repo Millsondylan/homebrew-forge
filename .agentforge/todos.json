@@ -337,9 +337,26 @@
       "id": "15",
       "label": "core",
       "description": "Implement self-verification hooks: logical checks (unit/assert) and empirical checks (execute test callable or integration call) after each task.",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T16:21:35.383620",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:21:35.383620",
+          "notes": "VerificationManager logs logical and empirical results per task."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:21:35.383620",
+          "notes": "Empirical hook confirms memory artifacts exist after completion; failures requeue tasks."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:21:35.383620"
+        }
+      }
     },
     {
       "id": "16",
