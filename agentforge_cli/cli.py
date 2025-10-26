@@ -296,13 +296,29 @@ def queue(ctx: click.Context) -> None:
 @queue.command()
 @click.argument("task_description")
 @click.option("--agent-model", "agent_model", default=None, help="Override agent model for this task.")
+@click.option("--idempotency-key", default=None, help="Prevent duplicate enqueue with the same key.")
+@click.option("--max-attempts", default=3, type=int, show_default=True, help="Maximum retry attempts before marking failed.")
+@click.option("--priority", default=0, type=int, show_default=True, help="Higher values run sooner.")
 @click.pass_obj
-def add(app: ForgeApp, task_description: str, agent_model: Optional[str]) -> None:
+def add(
+    app: ForgeApp,
+    task_description: str,
+    agent_model: Optional[str],
+    idempotency_key: Optional[str],
+    max_attempts: int,
+    priority: int,
+) -> None:
     """Add a task to the queue."""
     store = TaskStore(app.paths["task_db"])
     try:
-        task_id = store.add_task(task_description, agent_model)
-        click.echo(f"Task {task_id} added.")
+        task_id = store.add_task(
+            task_description,
+            agent_model,
+            idempotency_key=idempotency_key,
+            max_attempts=max_attempts,
+            priority=priority,
+        )
+        click.echo(f"Task {task_id} added." if idempotency_key is None else f"Task {task_id} ready (idempotency applied)")
     finally:
         store.close()
 
@@ -321,9 +337,13 @@ def list(app: ForgeApp, limit: Optional[int]) -> None:  # type: ignore[override]
         click.echo("No tasks in queue.")
         return
     for task in tasks:
+        available = task.available_at.isoformat()
+        now = datetime.utcnow()
+        delay_suffix = "" if task.available_at <= now else f" (delayed until {available})"
         click.echo(
             f"#{task.id} [{task.status}] {task.description} "
-            f"(agent_model={task.agent_model or app.config.get('models', {}).get('agent', {}).get('name', app.config['agent_model'])})"
+            f"(agent_model={task.agent_model or app.config.get('models', {}).get('agent', {}).get('name', app.config['agent_model'])}, "
+            f"attempts={task.attempts}/{task.max_attempts}, priority={task.priority}){delay_suffix}"
         )
 
 
