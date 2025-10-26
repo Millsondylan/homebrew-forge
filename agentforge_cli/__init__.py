@@ -2,7 +2,9 @@
 AgentForge CLI package.
 """
 
-from importlib.metadata import version, PackageNotFoundError
+from importlib.metadata import PackageNotFoundError, version
+
+from .app import ForgeApp
 
 
 def get_version() -> str:
@@ -13,4 +15,4 @@ def get_version() -> str:
         return "0.0.0"
 
 
-__all__ = ["get_version"]
+__all__ = ["ForgeApp", "get_version"]

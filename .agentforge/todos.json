@@ -29,9 +29,26 @@
       "id": "02",
       "label": "core",
       "description": "Design CLI skeleton (Python Click or Go Cobra). Provide commands: forge init, forge auth anthropic, forge model set, forge agent spawn, forge queue add, forge schedule, forge monitor.",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T14:52:02.918660",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T14:52:02.918660",
+          "notes": "CLI skeleton refactored to use shared ForgeApp context and command groups verified via pytest."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T14:52:02.918660",
+          "notes": "Click runner exercised auth/model/agent/queue/schedule group help invocations successfully."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest tests/test_cli_structure.py -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T14:52:02.918660"
+        }
+      }
     },
     {
       "id": "03",
