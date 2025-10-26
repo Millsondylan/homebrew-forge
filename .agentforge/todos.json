@@ -1,0 +1,221 @@
+{
+  "todos": [
+    {
+      "id": "01",
+      "label": "core",
+      "description": "Search repository files and extract: existing CLI code, package manifests, Dockerfiles, tests, and README. Persist results to /.agentforge/discovery.json.",
+      "status": "completed",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:46:09.968421",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T14:43:50.558472",
+          "notes": "Validated discovery.json includes primary CLI and dependency metadata."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T14:43:50.558472",
+          "notes": "Loaded discovery.json via python3 and confirmed key presence."
+        },
+        "integration": {
+          "status": "passed",
+          "timestamp": "2025-10-26T14:46:09.968421",
+          "notes": "Invoked CLI help via Click test runner to confirm entry point operational."
+        }
+      }
+    },
+    {
+      "id": "02",
+      "label": "core",
+      "description": "Design CLI skeleton (Python Click or Go Cobra). Provide commands: forge init, forge auth anthropic, forge model set, forge agent spawn, forge queue add, forge schedule, forge monitor.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "03",
+      "label": "core",
+      "description": "Implement `forge init` to create config, .env, and default directories (/agents, /logs, /db, /schedules).",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "04",
+      "label": "core",
+      "description": "Implement provider auth interface with pluggable backends (Anthropic, Gemini, Ollama, Local). Provide both API key and OAuth path for providers that require browser auth.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "05",
+      "label": "core",
+      "description": "Implement `forge auth anthropic --api-key <key>` and `forge auth anthropic --oauth` that opens the system browser to start OAuth and captures tokens locally (store tokens encrypted in ~/.agentforge/credentials.json).",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "06",
+      "label": "support",
+      "description": "Add a small HTTP listener for OAuth redirect capture on localhost and validate redirect URIs per OAuth rules.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "07",
+      "label": "core",
+      "description": "Implement `forge model set <provider>:<model>` that updates runtime config and broadcasts model-change to active agents.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "08",
+      "label": "core",
+      "description": "Implement agent worker pool and dispatcher capable of N concurrent agents (configurable). Begin with default N=10; include autoscaling hooks to reach 500 in v2 tests.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "09",
+      "label": "core",
+      "description": "Implement persistent task queue backed by SQLite or Redis with retry, backoff, and idempotency keys.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "10",
+      "label": "core",
+      "description": "Implement scheduler to add tasks to queue at specified times with cron-like syntax.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "11",
+      "label": "core",
+      "description": "Implement memory persistence and retrieval for agents (simple vector DB stub + metadata store). Use a local vector store (FAISS or SQLite-embeddings) as default.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "12",
+      "label": "core",
+      "description": "Implement enhanced system prompt manager that injects strict discipline rules (truth, double verification) into each agent's system prompt.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "13",
+      "label": "support",
+      "description": "Add logging subsystem: per-agent logs at /logs/agent_<id>.log and a system log /logs/system.log. Ensure rotation and structured JSON output.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "14",
+      "label": "support",
+      "description": "Add CLI `forge monitor` to stream logs and show agent status and queue length.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "15",
+      "label": "core",
+      "description": "Implement self-verification hooks: logical checks (unit/assert) and empirical checks (execute test callable or integration call) after each task.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "16",
+      "label": "verify",
+      "description": "Write unit tests for auth, model switching, queue operations, and scheduler. Ensure tests run in CI.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "17",
+      "label": "verify",
+      "description": "Integration test: spawn 20 agents, run 50 queued tasks, ensure all tasks reach terminal state with logs and verification passes.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "18",
+      "label": "support",
+      "description": "Implement safe shutdown and restart recovery preserving in-flight tasks and agent state.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "19",
+      "label": "support",
+      "description": "Create simple web dashboard (optional minimal) to show agent counts, queue stats, and provide a manual model switch UI.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "20",
+      "label": "verify",
+      "description": "Load test: simulate agent up to 500 (use synthetic agent stub) and measure queue throughput and retries. Log results and thresholds.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "21",
+      "label": "support",
+      "description": "Document commands, config, and dev setup. Update README with run instructions and verification checklist.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "22",
+      "label": "verify",
+      "description": "Perform full double verification pass: for each core feature run logical and empirical checks and append results to /logs/verification_<timestamp>.json.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "23",
+      "label": "core",
+      "description": "Implement `/login` shorthand that invokes `forge auth anthropic --oauth` and opens a browser. Provide fallback to paste auth code if redirect listener fails. Use cli tool UX patterns used by Claude Code/Tempo.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "24",
+      "label": "support",
+      "description": "Implement multi-model broadcast: `/agentmodel set <model>` to change workforce model for tasks in-flight and new tasks.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    },
+    {
+      "id": "25",
+      "label": "verify",
+      "description": "Produce a final summary report of all TODOs with PASS/FAIL and artifact links. Persist to /reports/final_verification.json.",
+      "status": "pending",
+      "created_at": "2025-10-26T14:43:50.558472",
+      "updated_at": "2025-10-26T14:43:50.558472"
+    }
+  ]
+}

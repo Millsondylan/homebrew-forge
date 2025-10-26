@@ -1,0 +1,41 @@
+{
+  "cli_files": [
+    "agentforge_cli/cli.py"
+  ],
+  "support_modules": [
+    "agentforge_cli/config.py",
+    "agentforge_cli/constants.py",
+    "agentforge_cli/logger.py",
+    "agentforge_cli/queue.py",
+    "agentforge_cli/scheduler.py"
+  ],
+  "package_manifests": [
+    "pyproject.toml",
+    "Formula/forge.rb"
+  ],
+  "distributions": [
+    "dist/agentforge-cli-0.2.0.tar.gz"
+  ],
+  "readme": "README.md",
+  "manifest": "AGENTFORGE_DEVELOPMENT_MANIFEST.md",
+  "dockerfiles": [],
+  "tests": [],
+  "dependencies": {
+    "python": ">=3.11",
+    "packages": [
+      "click>=8.1.7",
+      "PyYAML>=6.0.1"
+    ]
+  },
+  "notes": {
+    "queue_db": "SQLite file stored at ~/.agentforge/data/tasks.db",
+    "login_flow": "Browser login triggered, no OAuth callback listener implemented.",
+    "scheduling": "Scheduler polls every 5 seconds by default."
+  },
+  "risks": [
+    "No automated tests present.",
+    "API keys stored in plaintext config.",
+    "ThreadPool executor unlikely to scale to 500 agents.",
+    "No OAuth callback listener or token management."
+  ]
+}
