@@ -5,6 +5,7 @@ Command-line interface for AgentForge.
 from __future__ import annotations
 
 import json
+import shutil
 import time
 import webbrowser
 from datetime import datetime
@@ -249,6 +250,17 @@ def auth_cto_new(
 def slash_login(ctx: click.Context) -> None:
     """Slash command wrapper for anthropic auth."""
     ctx.invoke(anthropic, oauth=True)
+
+
+@cli.command(name="/new")
+@click.pass_obj
+def slash_new(app: ForgeApp) -> None:
+    """Clear the cnovo workspace directory."""
+    path = app.paths["cnovo_dir"]
+    if path.exists():
+        shutil.rmtree(path)
+    path.mkdir(parents=True, exist_ok=True)
+    click.echo(f"Reset workspace at {path}")
 
 
 @cli.command(name="/model")

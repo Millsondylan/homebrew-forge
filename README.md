@@ -66,7 +66,15 @@ This will **open your web browser** and redirect you to Anthropic's authenticati
 
 Looking for the full build philosophy, execution pipeline, and verification rules? Read the dedicated [AgentForge Development Manifest](AGENTFORGE_DEVELOPMENT_MANIFEST.md). It codifies discovery-first workflows, the 20+ TODO requirement, browser-based Anthropic authentication via `forge /login`, and double verification standards for every agent execution loop.
 
-### 3. Authenticate with cto.new
+### 3. Reset the cnovo workspace
+
+```bash
+forge /new
+```
+
+This clears and recreates the `~/.agentforge/cnovo` workspace directory—run it before starting a fresh planning session.
+
+### 4. Authenticate with cto.new
 
 ```bash
 forge auth cto-new --browser
@@ -75,7 +83,7 @@ forge auth cto-new --session-id <session_id> --cookie '<session-token>' --organi
 
 After logging in at https://cto.new/login, open your browser's developer tools to capture the `session_id`, the `__Secure-next-auth.session-token` cookie value, and your `organization_id` from network responses. Supply those values to the command above and Forge encrypts them for future use.
 
-### 4. Pick Your Primary Model
+### 5. Pick Your Primary Model
 
 Use the slash command for an interactive picker:
 
@@ -91,7 +99,7 @@ forge model select
 
 Either way, your choice persists in `~/.agentforge/config.yaml`.
 
-### 5. Set the Agent Workforce Model
+### 6. Set the Agent Workforce Model
 
 Define which model concurrent worker agents will run:
 
@@ -105,7 +113,7 @@ You can also update it directly:
 forge agent model set claude-3-5-haiku-20241022
 ```
 
-### 6. Add Tasks to the Queue
+### 7. Add Tasks to the Queue
 
 ```bash
 forge queue add "Refactor authentication module"
@@ -113,7 +121,7 @@ forge queue add "Add unit tests for user service"
 forge queue add "Optimize database queries"
 ```
 
-### 7. Run Agents
+### 8. Run Agents
 
 Launch agents to process your task queue:
 
@@ -127,25 +135,25 @@ Or spawn agents directly:
 forge agent spawn 10
 ```
 
-### 8. Search Agent Memory
+### 9. Search Agent Memory
 
 ```bash
 forge memory search "oauth"
 ```
 
-### 9. Preview System Prompts
+### 10. Preview System Prompts
 
 ```bash
 forge prompt preview "Implement autoscaling dispatcher" --context "Refer to runtime.autoscale settings"
 ```
 
-### 10. Launch the Dashboard
+### 11. Launch the Dashboard
 
 ```bash
 forge dashboard --host 127.0.0.1 --port 8765
 ```
 
-### 11. Run the Load Test
+### 12. Run the Load Test
 
 ```bash
 scripts/loadtest.sh --agents 500 --tasks 1000 --report reports/loadtest.json --reset
