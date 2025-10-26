@@ -279,9 +279,26 @@
       "id": "12",
       "label": "core",
       "description": "Implement enhanced system prompt manager that injects strict discipline rules (truth, double verification) into each agent's system prompt.",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T16:13:20.777407",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:13:20.777407",
+          "notes": "Prompt manager injects discipline rules and default verification requirements into every system prompt."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:13:20.777407",
+          "notes": "Queue worker logs rendered prompts and CLI preview displays full prompt with user-provided context."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:13:20.777407"
+        }
+      }
     },
     {
       "id": "13",

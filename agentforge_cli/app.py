@@ -10,6 +10,7 @@ from typing import Any, Dict
 from .auth import AuthManager, CredentialStore
 from .config import get_paths, load_config
 from .memory import MemoryStore
+from .prompts import SystemPromptManager
 
 
 @dataclass
@@ -27,6 +28,7 @@ class ForgeApp:
     state: Dict[str, Any] = field(default_factory=dict)
     _auth_manager: AuthManager | None = field(default=None, init=False, repr=False)
     _memory_store: MemoryStore | None = field(default=None, init=False, repr=False)
+    _prompt_manager: SystemPromptManager | None = field(default=None, init=False, repr=False)
 
     @classmethod
     def bootstrap(cls) -> ForgeApp:
@@ -51,6 +53,8 @@ class ForgeApp:
         if self._memory_store is not None:
             self._memory_store.close()
             self._memory_store = MemoryStore(self.paths["memory_db"])
+        if self._prompt_manager is not None:
+            self._prompt_manager = SystemPromptManager()
 
     def auth(self) -> AuthManager:
         if self._auth_manager is None:
@@ -62,6 +66,11 @@ class ForgeApp:
         if self._memory_store is None:
             self._memory_store = MemoryStore(self.paths["memory_db"])
         return self._memory_store
+
+    def prompt_manager(self) -> SystemPromptManager:
+        if self._prompt_manager is None:
+            self._prompt_manager = SystemPromptManager()
+        return self._prompt_manager
 
 
 __all__ = ["ForgeApp"]

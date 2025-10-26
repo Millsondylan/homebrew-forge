@@ -482,6 +482,25 @@ def search(app: ForgeApp, query: str, limit: int, agent_id: Optional[str]) -> No
         )
 
 
+@cli.group()
+@click.pass_context
+def prompt(ctx: click.Context) -> None:
+    """Prompt management helpers."""
+    if ctx.obj is None or not isinstance(ctx.obj, ForgeApp):
+        ctx.obj = ForgeApp.bootstrap()
+
+
+@prompt.command()
+@click.argument("task")
+@click.option("--context", multiple=True, help="Additional context lines to include.")
+@click.pass_obj
+def preview(app: ForgeApp, task: str, context: tuple[str, ...]) -> None:
+    """Render the system prompt that will be used for a task."""
+    manager = app.prompt_manager()
+    rendered = manager.render(task, context=context)
+    click.echo(rendered.system_prompt)
+
+
 @cli.command()
 @click.pass_obj
 def monitor(app: ForgeApp) -> None:

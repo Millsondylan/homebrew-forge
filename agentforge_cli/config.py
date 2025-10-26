@@ -86,6 +86,26 @@ DEFAULT_CONFIG: Dict[str, Any] = {
             "scale_down_idle_cycles": 3,
         },
     },
+    "prompts": {
+        "base": (
+            "You are an AgentForge autonomous developer."
+            "\nTask: {task_description}\n"
+            "\nDiscipline Rules:\n{rules}\n"
+            "\nRelevant Memory:\n{context}\n"
+            "\nVerification Plan:\n{verification}\n"
+        ),
+        "rules": [
+            "Truth Over Comfort — never omit or fabricate facts.",
+            "Full Completion — deliver end-to-end results with evidence.",
+            "Double Verification — run logical checks and empirical validation for every outcome.",
+            "Persistent Logging — record actions, decisions, and verification output.",
+            "Escalate Uncertainty — surface blockers immediately instead of guessing.",
+        ],
+        "default_verification": [
+            "Run logical assertions covering critical branches.",
+            "Execute empirical validation (tests, scripts, or external calls) and record evidence.",
+        ],
+    },
 }
 
 
@@ -145,6 +165,13 @@ def load_config() -> Dict[str, Any]:
     runtime_default["autoscale"] = DEFAULT_CONFIG["runtime"]["autoscale"].copy()
     merged.setdefault("runtime", runtime_default)
     merged["runtime"].setdefault("autoscale", runtime_default["autoscale"].copy())
+    prompts_default = DEFAULT_CONFIG["prompts"].copy()
+    prompts_default["rules"] = DEFAULT_CONFIG["prompts"]["rules"].copy()
+    prompts_default["default_verification"] = DEFAULT_CONFIG["prompts"]["default_verification"].copy()
+    merged.setdefault("prompts", prompts_default)
+    merged["prompts"].setdefault("rules", prompts_default["rules"])
+    merged["prompts"].setdefault("default_verification", prompts_default["default_verification"])
+    merged["prompts"].setdefault("base", prompts_default["base"])
     return merged
     return merged
 

@@ -18,6 +18,7 @@ from . import constants
 from .config import get_runtime_settings, load_config
 from .logger import write_agent_log, write_system_log
 from .memory import default_memory_store
+from .prompts import default_prompt_manager
 from .runtime.dispatcher import AgentDispatcher, AutoscaleState
 
 
@@ -503,6 +504,27 @@ def run_task_loop(concurrency: int, agent_model: Optional[str] = None, autoscale
 
 def _process_task(worker_id: int, store: TaskStore, task: Task, agent_model: str) -> None:
     """Simulate task execution with verification steps."""
+    memory_context: List[str] = []
+    try:
+        with default_memory_store() as memory_store:
+            candidates = memory_store.search(task.description, limit=3)
+            memory_context = [record.content for record in candidates]
+    except Exception as exc:  # pragma: no cover
+        write_system_log(f"Memory retrieval error for task {task.id}: {exc}")
+
+    prompt_manager = default_prompt_manager()
+    prompt_render = prompt_manager.render(
+        task.description,
+        context=memory_context,
+        verification_steps=[
+            "Confirm logical constraints for task outcome.",
+            "Perform empirical validation (tests or command execution).",
+        ],
+    )
+    write_agent_log(worker_id, "System prompt prepared:")
+    for line in prompt_render.system_prompt.splitlines():
+        write_agent_log(worker_id, f"  {line}")
+
     write_agent_log(worker_id, f"Task {task.id}: Execution started")
     # Simulate work
     time.sleep(0.5)
