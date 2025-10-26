@@ -304,9 +304,26 @@
       "id": "13",
       "label": "support",
       "description": "Add logging subsystem: per-agent logs at /logs/agent_<id>.log and a system log /logs/system.log. Ensure rotation and structured JSON output.",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T16:16:40.376084",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:16:40.376084",
+          "notes": "Logging now emits structured JSON with rotation for system and per-agent logs."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:16:40.376084",
+          "notes": "Logger tests confirmed JSON format and rotation; queue writes structured entries during processing."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:16:40.376084"
+        }
+      }
     },
     {
       "id": "14",
