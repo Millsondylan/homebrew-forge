@@ -526,6 +526,8 @@ def run_task_loop(concurrency: int, agent_model: Optional[str] = None, autoscale
 
 def _process_task(worker_id: int, store: TaskStore, task: Task, agent_model: str) -> None:
     """Simulate task execution with verification steps."""
+    current_config = load_config()
+    active_agent_model = current_config.get("models", {}).get("agent", {}).get("name", agent_model)
     memory_context: List[str] = []
     try:
         with default_memory_store() as memory_store:
@@ -567,7 +569,7 @@ def _process_task(worker_id: int, store: TaskStore, task: Task, agent_model: str
         return
     # Empirical verification (simulated)
     time.sleep(0.2)
-    result_message = f"Completed with {agent_model}"
+    result_message = f"Completed with {active_agent_model}"
     memory_entry_id: Optional[int] = None
     try:
         with default_memory_store() as memory_store:
@@ -576,7 +578,7 @@ def _process_task(worker_id: int, store: TaskStore, task: Task, agent_model: str
                 content=f"Task {task.id}: {task.description} -> {result_message}",
                 metadata={
                     "task_id": task.id,
-                    "agent_model": agent_model,
+                    "agent_model": active_agent_model,
                     "attempts": task.attempts,
                 },
             )

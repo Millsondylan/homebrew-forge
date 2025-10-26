@@ -537,17 +537,51 @@
       "id": "23",
       "label": "core",
       "description": "Implement `/login` shorthand that invokes `forge auth anthropic --oauth` and opens a browser. Provide fallback to paste auth code if redirect listener fails. Use cli tool UX patterns used by Claude Code/Tempo.",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T16:44:30.706772",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:44:30.706772",
+          "notes": "/login invokes Anthropic OAuth flow with browser fallback and manual code support."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:44:30.706772",
+          "notes": "CLI tests exercise auth anthropic OAuth path; prompt/credential hooks run end-to-end."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:44:30.706772"
+        }
+      }
     },
     {
       "id": "24",
       "label": "support",
       "description": "Implement multi-model broadcast: `/agentmodel set <model>` to change workforce model for tasks in-flight and new tasks.",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T16:44:30.706772",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:44:30.706772",
+          "notes": "Model switching broadcasts updates and dispatcher reads latest agent model per task."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:44:30.706772",
+          "notes": "Model command tests verify provider-qualified changes; integration run confirms tasks adopt updated model."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:44:30.706772"
+        }
+      }
     },
     {
       "id": "25",
