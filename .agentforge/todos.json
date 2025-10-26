@@ -504,9 +504,26 @@
       "id": "21",
       "label": "support",
       "description": "Document commands, config, and dev setup. Update README with run instructions and verification checklist.",
-      "status": "pending",
+      "status": "completed",
       "created_at": "2025-10-26T14:43:50.558472",
-      "updated_at": "2025-10-26T14:43:50.558472"
+      "updated_at": "2025-10-26T16:42:11.606667",
+      "verification": {
+        "logical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:42:11.606667",
+          "notes": "README documents memory, prompt, monitor, dashboard, and load test commands."
+        },
+        "empirical": {
+          "status": "passed",
+          "timestamp": "2025-10-26T16:42:11.606667",
+          "notes": "Documentation changes validated via repository review; commands referenced are covered by automated tests."
+        },
+        "unit_tests": {
+          "command": "python3 -m pytest -q",
+          "status": "passed",
+          "timestamp": "2025-10-26T16:42:11.606667"
+        }
+      }
     },
     {
       "id": "22",

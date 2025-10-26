@@ -18,6 +18,10 @@ That's it! Forge and all its dependencies are now installed.
 - `/model` and `/agentmodel` provide quick pickers for primary and workforce models.
 - Persistent queue, scheduler, and agent runners live in `~/.agentforge`.
 - `forge status` shows the current configuration snapshot.
+- `forge memory search` surfaces recent task memories with cosine-ranked results.
+- `forge monitor --follow` streams JSON logs alongside live queue stats.
+- `forge dashboard` serves a lightweight web UI for queue metrics and model switching.
+- `scripts/loadtest.sh --agents 500 --report reports/loadtest.json` runs a scalable load test and writes a metrics report.
 
 Reinstall to pick up the latest build:
 
@@ -114,6 +118,32 @@ Or spawn agents directly:
 forge agent spawn 10
 ```
 
+### 6. Search Agent Memory
+
+```bash
+forge memory search "oauth"
+```
+
+### 7. Preview System Prompts
+
+```bash
+forge prompt preview "Implement autoscaling dispatcher" --context "Refer to runtime.autoscale settings"
+```
+
+### 8. Launch the Dashboard
+
+```bash
+forge dashboard --host 127.0.0.1 --port 8765
+```
+
+### 9. Run the Load Test
+
+```bash
+scripts/loadtest.sh --agents 500 --tasks 1000 --report reports/loadtest.json --reset
+```
+
+The report captures queue throughput, completion counts, and execution duration in JSON format.
+
 ---
 
 ## 📋 Command Reference
@@ -156,6 +186,10 @@ forge agent spawn 10
 | `forge queue list --limit 50` | View up to 50 tasks |
 | `forge queue run` | Run queue with default settings |
 | `forge queue run --concurrency 10` | Run with custom concurrency |
+| `forge memory search <query>` | Retrieve stored task memories |
+| `forge prompt preview <task>` | Render the current system prompt |
+| `forge dashboard` | Launch the local monitoring dashboard |
+| `scripts/loadtest.sh` | Execute the load test harness |
 
 ### Scheduling
 
