@@ -86,7 +86,24 @@ class Forge < Formula
 
 
   def install
-    virtualenv_install_with_resources
+    # Create virtualenv
+    venv = virtualenv_create(libexec, "python3.11")
+
+    # Install dependencies allowing binary wheels
+    system libexec/"bin/pip", "install", "-v", "--upgrade", "pip", "setuptools", "wheel"
+
+    # Install all resources with binaries allowed
+    resources.each do |r|
+      r.stage do
+        system libexec/"bin/pip", "install", "-v", "."
+      end
+    end
+
+    # Install the main package
+    system libexec/"bin/pip", "install", "-v", "--no-deps", buildpath
+
+    # Create symlink
+    bin.install_symlink libexec/"bin/forge"
   end
 
   test do
