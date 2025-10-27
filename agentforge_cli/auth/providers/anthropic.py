@@ -20,16 +20,18 @@ class AnthropicProvider(AuthProvider):
 
         authorize_url = oauth_cfg.get("authorize_url")
         token_url = oauth_cfg.get("token_url")
-        client_id = oauth_cfg.get("client_id")
+        client_id = oauth_cfg.get("client_id")  # Can be None, will be prompted for
         scopes = tuple(oauth_cfg.get("scopes", []))
-        if not (authorize_url and token_url and client_id and scopes):
+        # Only require authorize_url, token_url, and scopes
+        # client_id can be None and will be prompted for by the CLI
+        if not (authorize_url and token_url and scopes):
             return None
         audience = oauth_cfg.get("audience")
         extra_params = oauth_cfg.get("extra_params", {})
         return OAuthMetadata(
             authorize_url=authorize_url,
             token_url=token_url,
-            client_id=client_id,
+            client_id=client_id,  # Can be None
             scopes=scopes,
             audience=audience,
             extra_params=extra_params,
