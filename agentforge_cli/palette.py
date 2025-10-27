@@ -36,7 +36,7 @@ def build_command_catalog(cli_group: click.Group) -> List[Dict[str, Any]]:
                     "name": full_name,
                     "help": cmd.help or "No description available",
                     "short_help": cmd.short_help or cmd.help or "",
-                    "params": [p.name for p in cmd.params if not p.hidden],
+                    "params": [p.name for p in cmd.params if not getattr(p, 'hidden', False)],
                 })
 
     extract_commands(cli_group)
