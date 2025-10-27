@@ -654,6 +654,227 @@ def verify_final_report(app: ForgeApp, output: Path) -> None:
     click.echo(f"Final verification report written to {report_path}")
 
 
+@cli.command(name="/")
+@click.pass_context
+def slash_palette(ctx: click.Context) -> None:
+    """Interactive command palette - browse and execute commands."""
+    from .palette import execute_command_from_palette
+
+    execute_command_from_palette(ctx.parent.command, ctx)
+
+
+@cli.command(name="resume")
+@click.argument("session_id", required=False)
+@click.pass_obj
+def resume_command(app: ForgeApp, session_id: Optional[str]) -> None:
+    """Resume a previous planning or execution session."""
+    from .session import list_sessions, load_session, find_session, get_latest_session
+
+    sessions_dir = app.paths["sessions_dir"]
+
+    # List available sessions
+    sessions = list_sessions(sessions_dir)
+
+    if not sessions:
+        click.echo("No sessions found.")
+        return
+
+    # If no session_id provided, show list and prompt
+    if not session_id:
+        click.echo("Available sessions:")
+        click.echo("")
+        for idx, sess in enumerate(sessions, 1):
+            status_icon = "✓" if sess["current_phase"] == "completed" else "●"
+            click.echo(
+                f"  {idx}. {status_icon} {sess['session_id'][:8]}... "
+                f"({sess['current_phase']}) - {sess['updated_at']}"
+            )
+            if sess.get("command"):
+                click.echo(f"      Command: {sess['command']}")
+            click.echo(f"      TODOs: {sess['completed_todos']}/{sess['todo_count']}")
+            click.echo("")
+
+        # Prompt for selection
+        choice = click.prompt(
+            "Select session number (or Enter for latest)",
+            type=str,
+            default="",
+        )
+
+        if choice == "":
+            # Use latest
+            latest = get_latest_session(sessions_dir)
+            if latest:
+                session_id = latest["session_id"]
+            else:
+                click.echo("No sessions available.")
+                return
+        else:
+            try:
+                idx = int(choice) - 1
+                if 0 <= idx < len(sessions):
+                    session_id = sessions[idx]["session_id"]
+                else:
+                    click.echo("Invalid selection.")
+                    return
+            except ValueError:
+                # Try as session ID or prefix
+                found = find_session(choice, sessions_dir)
+                if found:
+                    session_id = found
+                else:
+                    click.echo(f"Session not found: {choice}")
+                    return
+
+    # Load session
+    try:
+        session = load_session(session_id, sessions_dir)
+    except (FileNotFoundError, ValueError) as e:
+        click.echo(f"Error loading session: {e}")
+        return
+
+    # Display session info
+    click.echo(f"Resuming session: {session.session_id}")
+    click.echo(f"  Created: {session.created_at}")
+    click.echo(f"  Updated: {session.updated_at}")
+    click.echo(f"  Command: {session.command or 'N/A'}")
+    click.echo(f"  Phase: {session.current_phase}")
+
+    progress = session.get_progress()
+    click.echo(f"  Progress: {progress['completed']}/{progress['total']} TODOs ({progress['percent']}%)")
+
+    # Display outputs
+    if session.outputs:
+        click.echo(f"  Outputs:")
+        for key, value in session.outputs.items():
+            click.echo(f"    - {key}: {value}")
+
+    # Display pending TODOs
+    pending = session.get_pending_todos()
+    if pending:
+        click.echo(f"\nPending TODOs ({len(pending)}):")
+        for todo in pending[:5]:
+            click.echo(f"  - {todo.id}: {todo.title}")
+        if len(pending) > 5:
+            click.echo(f"  ... and {len(pending) - 5} more")
+
+    click.echo("\nSession restored successfully!")
+    click.echo("You can now continue execution from this checkpoint.")
+
+
+@cli.command(name="plan")
+@click.option("--output-dir", type=click.Path(path_type=Path), default=None, help="Directory to save plan and TODOs.")
+@click.pass_obj
+def plan_command(app: ForgeApp, output_dir: Optional[Path]) -> None:
+    """Generate discovery report, execution plan, and TODOs."""
+    from .discovery import discover_codebase, discover_components, generate_discovery_report
+    from .planning import generate_plan, format_todos_yaml
+    from .session import Session, save_session
+
+    if output_dir is None:
+        output_dir = app.paths["docs_dir"]
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    click.echo("Starting discovery phase...")
+
+    # Discovery
+    project_root = app.paths["project_root"]
+
+    # Load existing discovery if available
+    from .discovery import load_existing_discovery, merge_discovery
+    existing_discovery_file = project_root / ".agentforge" / "discovery.json"
+    existing_discovery = load_existing_discovery(existing_discovery_file)
+
+    if existing_discovery:
+        click.echo(f"  Loaded existing discovery from {existing_discovery_file}")
+
+    discovery_report = generate_discovery_report(
+        project_root,
+        output_file=output_dir / "discovery.md",
+        requirements=["/plan", "/resume", "/"]
+    )
+
+    click.echo(f"✓ Discovery complete: {output_dir / 'discovery.md'}")
+
+    # Generate plan
+    click.echo("Generating execution plan...")
+
+    # Define feature specifications
+    feature_specs = [
+        {
+            "name": "/plan command",
+            "phase": "Plan Command Implementation",
+            "description": "Implement automated discovery and planning",
+            "components": [
+                "Discovery automation module",
+                "Planning workflow module",
+                "TODO generation system",
+                "CLI plan command",
+            ]
+        },
+        {
+            "name": "/resume command",
+            "phase": "Resume Command Implementation",
+            "description": "Implement session restoration",
+            "components": [
+                "Session scanning",
+                "Session selection UI",
+                "State restoration",
+                "CLI resume command",
+            ]
+        },
+        {
+            "name": "/ command palette",
+            "phase": "Command Palette Implementation",
+            "description": "Implement interactive command browser",
+            "components": [
+                "Command catalog builder",
+                "Interactive selector",
+                "Fuzzy search",
+                "CLI palette command",
+            ]
+        },
+    ]
+
+    plan_md, todos = generate_plan(
+        project_root,
+        feature_specs,
+        output_dir=output_dir
+    )
+
+    click.echo(f"✓ Plan generated: {output_dir / 'plan.md'}")
+
+    # Generate TODOs YAML
+    todos_yaml = format_todos_yaml(
+        todos,
+        project_name="AgentForge",
+        target_version="0.4.0",
+        output_file=output_dir / "TODOs.yaml"
+    )
+
+    click.echo(f"✓ TODOs generated: {output_dir / 'TODOs.yaml'} ({len(todos)} items)")
+
+    # Create session
+    session = Session(command="plan", current_phase="planning")
+    session.context["project_root"] = str(project_root)
+    session.context["output_dir"] = str(output_dir)
+    session.outputs["discovery_report"] = str(output_dir / "discovery.md")
+    session.outputs["plan_file"] = str(output_dir / "plan.md")
+    session.outputs["todos_file"] = str(output_dir / "TODOs.yaml")
+
+    session_file = save_session(session, app.paths["sessions_dir"])
+    click.echo(f"✓ Session saved: {session_file.name}")
+
+    # Summary
+    click.echo("")
+    click.echo("Plan generation complete!")
+    click.echo(f"  - Discovery: {output_dir / 'discovery.md'}")
+    click.echo(f"  - Plan: {output_dir / 'plan.md'}")
+    click.echo(f"  - TODOs: {output_dir / 'TODOs.yaml'} ({len(todos)} items)")
+    click.echo(f"  - Session: {session_file.name}")
+
+
 @cli.command()
 @click.pass_obj
 def status(app: ForgeApp) -> None:

@@ -17,7 +17,7 @@ from . import constants
 
 
 DEFAULT_CONFIG: Dict[str, Any] = {
-    "version": "0.2.0",
+    "version": "0.4.0",
     "active_model": constants.DEFAULT_MODELS[0],
     "agent_model": constants.DEFAULT_MODELS[1],
     "available_models": constants.DEFAULT_MODELS,

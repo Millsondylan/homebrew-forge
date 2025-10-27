@@ -12,7 +12,16 @@ brew install millsondylan/forge/forge
 
 That's it! Forge and all its dependencies are now installed.
 
-## 🆕 v0.2.0 Highlights
+## 🆕 v0.4.0 Highlights
+
+- **`forge plan`** - Automated discovery and planning with 20+ TODO generation
+- **`forge resume`** - Resume previous sessions from checkpoints
+- **`forge /`** - Interactive command palette with search and filtering
+- Complete session state management and persistence
+- Project-local `docs/`, `logs/`, and `sessions/` directories
+- Comprehensive planning workflow with dependency ordering
+
+## v0.2.0 Highlights
 
 - `/login` and `auth anthropic` now launch the Anthropic browser flow automatically.
 - `/model` and `/agentmodel` provide quick pickers for primary and workforce models.
@@ -176,6 +185,9 @@ The report captures queue throughput, completion counts, and execution duration 
 | `forge /agentmodel` | Interactive picker for the agent workforce model |
 | `forge auth openai <key>` | Store OpenAI API key in system keyring |
 | `forge auth gemini <key>` | Store Gemini API key in system keyring |
+| `forge plan` | Generate discovery report, execution plan, and 20+ TODOs |
+| `forge resume [session_id]` | Resume a previous session from checkpoint |
+| `forge /` | Interactive command palette with search |
 
 ### Model Management
 

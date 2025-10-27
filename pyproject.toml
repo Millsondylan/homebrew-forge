@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "agentforge-cli"
-version = "0.3.0"
+version = "0.4.0"
 description = "AgentForge CLI with browser-based Anthropic login and agent model management."
 authors = [
     {name = "AgentForge Team"},
