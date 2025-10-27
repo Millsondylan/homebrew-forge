@@ -4,7 +4,7 @@ class Forge < Formula
   desc "AgentForge CLI with automated planning and session management"
   homepage "https://github.com/Millsondylan/forge"
   url "https://github.com/Millsondylan/homebrew-forge/releases/download/v0.4.0/agentforge_cli-0.4.0.tar.gz"
-  sha256 "8344fed4118caf7e92a7a67cc92e870aa662669135dc34f2238b0b27644c274a"
+  sha256 "eb235862bab34d1738d1c9896385849a498aa4cc81cb7abec77567b9f83dd36d"
   version "0.4.0"
 
   depends_on "python@3.11"

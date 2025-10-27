@@ -23,5 +23,6 @@ dependencies = [
 [project.scripts]
 forge = "agentforge_cli.cli:cli"
 
-[tool.setuptools]
-packages = ["agentforge_cli"]
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["agentforge_cli*"]
