@@ -84,40 +84,6 @@ class Forge < Formula
     sha256 "360b9e3dbb49a209c21ad61809c7fb453643e048b38924c765813546746e81c3"
   end
 
-  resource "importlib-metadata" do
-    url "https://files.pythonhosted.org/packages/source/i/importlib_metadata/importlib_metadata-8.7.0.tar.gz"
-    sha256 "d13b81ad223b890aa16c5471f2ac3056cf76c5f10f82d6f9292f0b415f389000"
-  end
-
-  resource "zipp" do
-    url "https://files.pythonhosted.org/packages/source/z/zipp/zipp-3.23.0.tar.gz"
-    sha256 "a07157588a12518c9d4034df3fbbee09c814741a33ff63c05fa29d26a2404166"
-  end
-
-  resource "jaraco.classes" do
-    url "https://files.pythonhosted.org/packages/source/j/jaraco.classes/jaraco.classes-3.4.0.tar.gz"
-    sha256 "47a024b51d0239c0dd8c8540c6c7f484be3b8fcf0b2d85c13825780d3b3f3acd"
-  end
-
-  resource "jaraco.context" do
-    url "https://files.pythonhosted.org/packages/c9/60/e83781b07f9a28d68b8b41f41268e7d208422f81f2d9b6c9a8d0a7c17391/jaraco.context-5.3.0.tar.gz"
-    sha256 "5d9e95ca0faa78943ed66f6bc658dd637430f16125d86988e77844c741ff2f11"
-  end
-
-  resource "jaraco.functools" do
-    url "https://files.pythonhosted.org/packages/source/j/jaraco.functools/jaraco_functools-4.3.0.tar.gz"
-    sha256 "cfd13ad0dd2c47a3600b439ef72d8615d482cedcff1632930d6f28924d92f294"
-  end
-
-  resource "more-itertools" do
-    url "https://files.pythonhosted.org/packages/df/ad/7905a7fd46ffb61d976133a4f47799388209e73cbc8c1253593335da88b4/more-itertools-10.2.0.tar.gz"
-    sha256 "8fccb480c43d3e99a00087634c06dd02b0d50fbf088b380de5a41a015ec239e1"
-  end
-
-  resource "backports.tarfile" do
-    url "https://files.pythonhosted.org/packages/b4/e3/72b31fe558e3b81fb9c8f2cdb6b6c1f2c3c7c90f718168c6b0cfdacabff6/backports.tarfile-1.0.0.tar.gz"
-    sha256 "d75e02c268746e1b8144c278978b6e98e85de6ad16f8e4b0844a154557eca991"
-  end
 
   def install
     virtualenv_install_with_resources
