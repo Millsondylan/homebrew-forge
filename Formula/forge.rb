@@ -86,13 +86,10 @@ class Forge < Formula
 
 
   def install
-    # Create virtualenv
-    venv = virtualenv_create(libexec, "python3.11")
+    # Create virtualenv with pip
+    virtualenv_create(libexec, "python3.11")
 
-    # Install dependencies allowing binary wheels
-    system libexec/"bin/pip", "install", "-v", "--upgrade", "pip", "setuptools", "wheel"
-
-    # Install all resources with binaries allowed
+    # Install each resource allowing binary wheels
     resources.each do |r|
       r.stage do
         system libexec/"bin/pip", "install", "-v", "."
