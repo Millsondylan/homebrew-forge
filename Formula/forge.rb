@@ -1,11 +1,11 @@
 class Forge < Formula
   include Language::Python::Virtualenv
 
-  desc "AgentForge CLI: spawn/manage 500+ agents with queue, scheduler, and dashboard"
+  desc "AgentForge CLI with automated planning and session management"
   homepage "https://github.com/Millsondylan/forge"
-  url "https://github.com/Millsondylan/homebrew-forge/releases/download/v0.3.0/agentforge-cli-0.3.0.tar.gz"
-  sha256 "87ad058a62c98a92c39f9055f420834aa4626df2760f8910b8e5e146b41d0ae1"
-  version "0.3.0"
+  url "https://github.com/Millsondylan/homebrew-forge/releases/download/v0.4.0/agentforge_cli-0.4.0.tar.gz"
+  sha256 "8344fed4118caf7e92a7a67cc92e870aa662669135dc34f2238b0b27644c274a"
+  version "0.4.0"
 
   depends_on "python@3.11"
 
