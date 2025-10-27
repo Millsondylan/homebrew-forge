@@ -19,11 +19,6 @@ class Forge < Formula
     sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
   end
 
-  resource "cryptography" do
-    url "https://files.pythonhosted.org/packages/source/c/cryptography/cryptography-43.0.1.tar.gz"
-    sha256 "203e92a75716d8cfb491dc47c79e17d0d9207ccffcbcb35f598fbe463ae3444d"
-  end
-
   resource "keyring" do
     url "https://files.pythonhosted.org/packages/source/k/keyring/keyring-25.6.0.tar.gz"
     sha256 "0b39998aa941431eb3d9b0d4b2460bc773b9df6fed7621c2dfb291a7e0187a66"
@@ -86,21 +81,11 @@ class Forge < Formula
 
 
   def install
-    # Create virtualenv with pip
-    virtualenv_create(libexec, "python3.11")
+    # Install all resources except cryptography using standard method
+    virtualenv_install_with_resources
 
-    # Install each resource allowing binary wheels
-    resources.each do |r|
-      r.stage do
-        system libexec/"bin/pip", "install", "-v", "."
-      end
-    end
-
-    # Install the main package
-    system libexec/"bin/pip", "install", "-v", "--no-deps", buildpath
-
-    # Create symlink
-    bin.install_symlink libexec/"bin/forge"
+    # Install cryptography separately allowing binary wheel (avoids Rust requirement)
+    system libexec/"bin/python", "-m", "pip", "install", "cryptography>=43.0.1"
   end
 
   test do
