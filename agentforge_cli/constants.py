@@ -26,6 +26,15 @@ CREDENTIAL_KEY_FILE: Path
 MEMORY_DB: Path
 CNOVO_DIR: Path
 
+# Project-local paths for docs/, logs/, sessions/
+PROJECT_ROOT: Path
+DOCS_DIR: Path
+SESSIONS_DIR: Path
+PROJECT_LOG_DIR: Path
+PLAN_FILE: Path
+DISCOVERY_FILE: Path
+TODOS_FILE: Path
+
 # Default Anthropic login URL used to launch the standard Anthropic browser sign-in flow.
 ANTHROPIC_LOGIN_URL = "https://console.anthropic.com/login"
 
@@ -50,6 +59,8 @@ def refresh_paths() -> None:
     global CONFIG_ROOT, CONFIG_FILE, ENV_FILE, AGENTS_DIR, DATA_DIR, DB_DIR
     global LOG_DIR, SCHEDULES_DIR, AGENT_LOG_TEMPLATE, SYSTEM_LOG_FILE, TASK_DB
     global MANIFEST_FILE, CREDENTIALS_FILE, CREDENTIAL_KEY_FILE, MEMORY_DB, CNOVO_DIR
+    global PROJECT_ROOT, DOCS_DIR, SESSIONS_DIR, PROJECT_LOG_DIR
+    global PLAN_FILE, DISCOVERY_FILE, TODOS_FILE
 
     root = Path(os.environ.get("AGENTFORGE_HOME", str(DEFAULT_CONFIG_ROOT))).expanduser()
     CONFIG_ROOT = root
@@ -68,6 +79,16 @@ def refresh_paths() -> None:
     CREDENTIAL_KEY_FILE = root / ".credentials.key"
     MEMORY_DB = DB_DIR / "memory.db"
     CNOVO_DIR = root / "cnovo"
+
+    # Project-local paths (in current working directory or AGENTFORGE_PROJECT_ROOT)
+    project_root = Path(os.environ.get("AGENTFORGE_PROJECT_ROOT", Path.cwd())).expanduser()
+    PROJECT_ROOT = project_root
+    DOCS_DIR = project_root / "docs"
+    SESSIONS_DIR = project_root / "sessions"
+    PROJECT_LOG_DIR = project_root / "logs"
+    PLAN_FILE = DOCS_DIR / "plan.md"
+    DISCOVERY_FILE = DOCS_DIR / "discovery.md"
+    TODOS_FILE = DOCS_DIR / "TODOs.yaml"
 
 
 refresh_paths()

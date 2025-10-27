@@ -1,0 +1,799 @@
+version: "1.0"
+generated: "2025-10-27"
+project: "AgentForge v0.4.0"
+phase: "Implementation of /plan, /resume, and / commands"
+
+todos:
+  # ═══════════════════════════════════════════════════════════════
+  # PHASE 1: FOUNDATION - Directory Structure and Session Management
+  # ═══════════════════════════════════════════════════════════════
+
+  - id: "TODO-001"
+    label: "core"
+    priority: 1
+    title: "Create directory structure for docs, logs, and sessions"
+    description: |
+      Create the required directory structure:
+      - docs/ for plan.md, discovery.md, TODOs.yaml
+      - logs/ for execution logs (agent_<id>.log, system.log)
+      - sessions/ for session state files (session_<id>.json)
+      Ensure directories are created with proper permissions and .gitkeep files.
+    dependencies: []
+    files_created:
+      - "docs/.gitkeep"
+      - "logs/.gitkeep"
+      - "sessions/.gitkeep"
+    verification:
+      logical: "Verify directories exist with os.path.isdir()"
+      empirical: "List directory contents with ls command"
+    status: "pending"
+    estimated_effort: "10 minutes"
+
+  - id: "TODO-002"
+    label: "core"
+    priority: 1
+    title: "Design session state schema"
+    description: |
+      Create a comprehensive session state schema that captures:
+      - session_id (UUID)
+      - created_at, updated_at timestamps
+      - command executed
+      - current_phase (discovery/planning/execution/verification/documentation)
+      - todos: list of TODO items with status
+      - verification_state: logical and empirical results
+      - context: relevant codebase context
+      - outputs: generated files and logs
+      Define this schema in agentforge_cli/session.py
+    dependencies: ["TODO-001"]
+    files_created:
+      - "agentforge_cli/session.py"
+    files_modified: []
+    verification:
+      logical: "Validate schema with pydantic or dataclasses"
+      empirical: "Serialize and deserialize sample session"
+    status: "pending"
+    estimated_effort: "30 minutes"
+
+  - id: "TODO-003"
+    label: "core"
+    priority: 1
+    title: "Implement session serialization and deserialization"
+    description: |
+      In agentforge_cli/session.py, implement:
+      - Session class with to_dict() and from_dict() methods
+      - save_session(session, path) -> saves to sessions/session_<id>.json
+      - load_session(session_id) -> loads from sessions/session_<id>.json
+      - validate_session(session) -> validates schema
+      Use JSON for serialization with proper datetime handling.
+    dependencies: ["TODO-002"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/session.py"
+    verification:
+      logical: "Unit test save → load cycle preserves data"
+      empirical: "Create session file and verify JSON structure"
+    status: "pending"
+    estimated_effort: "45 minutes"
+
+  - id: "TODO-004"
+    label: "core"
+    priority: 1
+    title: "Implement session listing and selection utilities"
+    description: |
+      In agentforge_cli/session.py, implement:
+      - list_sessions() -> returns list of session metadata
+      - find_session(session_id) -> finds session by ID or prefix
+      - get_latest_session() -> returns most recent session
+      - delete_session(session_id) -> removes session file
+      Include sorting by timestamp and filtering by status.
+    dependencies: ["TODO-003"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/session.py"
+    verification:
+      logical: "Unit tests for listing, finding, and deletion"
+      empirical: "Create 5 sessions and list them correctly"
+    status: "pending"
+    estimated_effort: "30 minutes"
+
+  - id: "TODO-005"
+    label: "support"
+    priority: 2
+    title: "Update config.py to include session and docs paths"
+    description: |
+      In agentforge_cli/config.py, add paths for:
+      - session_dir: Path to sessions/
+      - docs_dir: Path to docs/
+      - plan_file: Path to docs/plan.md
+      - discovery_file: Path to docs/discovery.md
+      - todos_file: Path to docs/TODOs.yaml
+      Update ensure_directories() to create these paths.
+    dependencies: ["TODO-001"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/config.py"
+    verification:
+      logical: "Verify paths added to DEFAULT_CONFIG"
+      empirical: "Run forge init and check paths created"
+    status: "pending"
+    estimated_effort: "20 minutes"
+
+  # ═══════════════════════════════════════════════════════════════
+  # PHASE 2: PLAN COMMAND - Discovery and TODO Generation
+  # ═══════════════════════════════════════════════════════════════
+
+  - id: "TODO-006"
+    label: "core"
+    priority: 1
+    title: "Create discovery automation module"
+    description: |
+      Create agentforge_cli/discovery.py with:
+      - discover_codebase() -> analyzes repository structure
+      - discover_components() -> identifies existing components
+      - discover_dependencies() -> maps technical dependencies
+      - discover_missing() -> identifies gaps vs requirements
+      - generate_discovery_report() -> creates docs/discovery.md
+      Use Glob and file inspection to analyze structure.
+    dependencies: ["TODO-005"]
+    files_created:
+      - "agentforge_cli/discovery.py"
+    files_modified: []
+    verification:
+      logical: "Unit test discovery functions return expected data"
+      empirical: "Run discovery on test project and verify output"
+    status: "pending"
+    estimated_effort: "1 hour"
+
+  - id: "TODO-007"
+    label: "core"
+    priority: 1
+    title: "Create planning workflow module"
+    description: |
+      Create agentforge_cli/planning.py with:
+      - generate_plan() -> creates execution roadmap
+      - generate_todos() -> creates 20+ ordered TODO items
+      - order_by_dependencies() -> sorts by dependency chain
+      - format_plan_markdown() -> generates docs/plan.md
+      - format_todos_yaml() -> generates docs/TODOs.yaml
+      Use template-based generation with customization.
+    dependencies: ["TODO-006"]
+    files_created:
+      - "agentforge_cli/planning.py"
+    files_modified: []
+    verification:
+      logical: "Unit test plan generation produces valid structure"
+      empirical: "Generate plan and validate markdown/YAML"
+    status: "pending"
+    estimated_effort: "1.5 hours"
+
+  - id: "TODO-008"
+    label: "core"
+    priority: 1
+    title: "Implement TODO generation system (20+ items)"
+    description: |
+      In agentforge_cli/planning.py, implement:
+      - create_todo(title, description, label, priority, dependencies)
+      - generate_todo_list(plan) -> creates 20+ TODO items
+      - validate_todo_count() -> ensures minimum 20 items
+      - label_todos() -> assigns core/support/verify labels
+      - calculate_priorities() -> orders by dependency
+      Each TODO must have: id, label, title, description, dependencies,
+      files_created, files_modified, verification, status, estimated_effort.
+    dependencies: ["TODO-007"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/planning.py"
+    verification:
+      logical: "Unit test generates >= 20 valid TODOs"
+      empirical: "Generate TODOs and verify YAML structure"
+    status: "pending"
+    estimated_effort: "1 hour"
+
+  - id: "TODO-009"
+    label: "core"
+    priority: 1
+    title: "Implement dependency ordering logic"
+    description: |
+      In agentforge_cli/planning.py, implement:
+      - build_dependency_graph(todos) -> creates directed graph
+      - topological_sort(graph) -> orders by dependencies
+      - detect_cycles(graph) -> validates no circular deps
+      - assign_levels(todos) -> groups by dependency level
+      Use standard graph algorithms to ensure valid order.
+    dependencies: ["TODO-008"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/planning.py"
+    verification:
+      logical: "Unit test detects cycles and orders correctly"
+      empirical: "Create TODOs with deps and verify sort order"
+    status: "pending"
+    estimated_effort: "45 minutes"
+
+  - id: "TODO-010"
+    label: "core"
+    priority: 1
+    title: "Implement /plan command in CLI"
+    description: |
+      In agentforge_cli/cli.py, add:
+      - @cli.command(name="/plan") or @cli.command(name="plan")
+      - Runs discovery automation
+      - Generates execution plan
+      - Creates 20+ TODOs
+      - Saves docs/plan.md
+      - Saves docs/TODOs.yaml
+      - Creates session state
+      - No confirmation prompts (autonomous)
+      Display summary of plan and TODO count.
+    dependencies: ["TODO-009"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/cli.py"
+    verification:
+      logical: "Unit test with CliRunner validates command"
+      empirical: "Run forge plan and verify files created"
+    status: "pending"
+    estimated_effort: "1 hour"
+
+  - id: "TODO-011"
+    label: "support"
+    priority: 2
+    title: "Integrate with existing discovery.json"
+    description: |
+      Update agentforge_cli/discovery.py to:
+      - Read existing .agentforge/discovery.json
+      - Merge with new discovery data
+      - Update .agentforge/discovery.json
+      - Use as input for plan generation
+      Ensure backward compatibility with existing format.
+    dependencies: ["TODO-010"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/discovery.py"
+    verification:
+      logical: "Unit test reads and merges correctly"
+      empirical: "Run plan with existing discovery.json"
+    status: "pending"
+    estimated_effort: "30 minutes"
+
+  - id: "TODO-012"
+    label: "verify"
+    priority: 2
+    title: "Add unit tests for plan command workflow"
+    description: |
+      Create tests/test_planning.py with tests for:
+      - Discovery automation
+      - Plan generation
+      - TODO generation (20+ items)
+      - Dependency ordering
+      - YAML/Markdown formatting
+      - CLI plan command
+      - File creation verification
+      Achieve >90% coverage on planning module.
+    dependencies: ["TODO-011"]
+    files_created:
+      - "tests/test_planning.py"
+    files_modified: []
+    verification:
+      logical: "pytest passes all planning tests"
+      empirical: "Coverage report shows >90% for planning.py"
+    status: "pending"
+    estimated_effort: "1 hour"
+
+  # ═══════════════════════════════════════════════════════════════
+  # PHASE 3: RESUME COMMAND - Session State Restoration
+  # ═══════════════════════════════════════════════════════════════
+
+  - id: "TODO-013"
+    label: "core"
+    priority: 1
+    title: "Implement session file scanning"
+    description: |
+      In agentforge_cli/session.py, implement:
+      - scan_sessions(directory) -> lists all session files
+      - parse_session_metadata(file) -> extracts key info
+      - format_session_list(sessions) -> displays nicely
+      - filter_sessions(sessions, criteria) -> filters by status/date
+      Sort by most recent first.
+    dependencies: ["TODO-004"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/session.py"
+    verification:
+      logical: "Unit test scans directory correctly"
+      empirical: "Create sessions and list them"
+    status: "pending"
+    estimated_effort: "30 minutes"
+
+  - id: "TODO-014"
+    label: "core"
+    priority: 1
+    title: "Implement session selection UI"
+    description: |
+      In agentforge_cli/session.py, implement:
+      - display_sessions(sessions) -> shows indexed list
+      - prompt_session_selection(sessions) -> arrow key or number
+      - select_by_id(session_id) -> direct selection
+      - select_latest() -> auto-select most recent
+      Use click.prompt or readline for interaction.
+    dependencies: ["TODO-013"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/session.py"
+    verification:
+      logical: "Unit test selection logic"
+      empirical: "Interactive test with mock sessions"
+    status: "pending"
+    estimated_effort: "45 minutes"
+
+  - id: "TODO-015"
+    label: "core"
+    priority: 1
+    title: "Implement state restoration logic"
+    description: |
+      In agentforge_cli/session.py, implement:
+      - restore_session(session_id) -> loads session
+      - restore_todos(session) -> restores TODO state
+      - restore_verification(session) -> restores verification
+      - restore_context(session) -> restores codebase context
+      - validate_restoration(session) -> checks integrity
+      Handle partial restoration gracefully with warnings.
+    dependencies: ["TODO-014"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/session.py"
+    verification:
+      logical: "Unit test restoration preserves state"
+      empirical: "Save → restore cycle maintains data"
+    status: "pending"
+    estimated_effort: "1 hour"
+
+  - id: "TODO-016"
+    label: "core"
+    priority: 1
+    title: "Implement /resume command in CLI"
+    description: |
+      In agentforge_cli/cli.py, add:
+      - @cli.command(name="/resume") or @cli.command(name="resume")
+      - Optional argument [session_id]
+      - If no ID provided, show interactive list
+      - Allow arrow key selection or number input
+      - Load session state
+      - Restore TODOs and verification state
+      - Continue execution from checkpoint
+      - No confirmation prompts (autonomous)
+      Display session metadata and continuation point.
+    dependencies: ["TODO-015"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/cli.py"
+    verification:
+      logical: "Unit test with CliRunner validates command"
+      empirical: "Run forge resume and verify restoration"
+    status: "pending"
+    estimated_effort: "1 hour"
+
+  - id: "TODO-017"
+    label: "verify"
+    priority: 2
+    title: "Add unit tests for resume command workflow"
+    description: |
+      Create tests/test_session.py with tests for:
+      - Session serialization/deserialization
+      - Session scanning and listing
+      - Session selection
+      - State restoration
+      - CLI resume command
+      - Save → resume → continue workflow
+      Achieve >90% coverage on session module.
+    dependencies: ["TODO-016"]
+    files_created:
+      - "tests/test_session.py"
+    files_modified: []
+    verification:
+      logical: "pytest passes all session tests"
+      empirical: "Coverage report shows >90% for session.py"
+    status: "pending"
+    estimated_effort: "1 hour"
+
+  # ═══════════════════════════════════════════════════════════════
+  # PHASE 4: COMMAND PALETTE - Interactive Command Browser
+  # ═══════════════════════════════════════════════════════════════
+
+  - id: "TODO-018"
+    label: "core"
+    priority: 1
+    title: "Create command catalog builder"
+    description: |
+      Create agentforge_cli/palette.py with:
+      - build_command_catalog() -> lists all CLI commands
+      - extract_command_metadata() -> gets name, description, args
+      - group_commands() -> organizes by category
+      - format_command_display() -> pretty printing
+      Use click introspection to discover commands dynamically.
+    dependencies: ["TODO-005"]
+    files_created:
+      - "agentforge_cli/palette.py"
+    files_modified: []
+    verification:
+      logical: "Unit test builds catalog from CLI"
+      empirical: "Print catalog and verify completeness"
+    status: "pending"
+    estimated_effort: "45 minutes"
+
+  - id: "TODO-019"
+    label: "core"
+    priority: 1
+    title: "Implement interactive selector with arrow keys"
+    description: |
+      In agentforge_cli/palette.py, implement:
+      - display_palette(commands) -> shows command list
+      - handle_arrow_keys() -> up/down navigation
+      - handle_enter() -> select command
+      - handle_esc() -> cancel (ESC × 2)
+      - execute_selected(command) -> runs command
+      Use blessed, pick library, or readline for terminal UI.
+    dependencies: ["TODO-018"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/palette.py"
+    verification:
+      logical: "Unit test navigation logic"
+      empirical: "Interactive test with keyboard input"
+    status: "pending"
+    estimated_effort: "1.5 hours"
+
+  - id: "TODO-020"
+    label: "core"
+    priority: 1
+    title: "Implement fuzzy search capability"
+    description: |
+      In agentforge_cli/palette.py, implement:
+      - filter_commands(query, commands) -> fuzzy matches
+      - highlight_matches(query, text) -> visual feedback
+      - update_display_on_keypress() -> real-time filtering
+      Use simple substring matching or fuzzy matching library.
+    dependencies: ["TODO-019"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/palette.py"
+    verification:
+      logical: "Unit test fuzzy matching accuracy"
+      empirical: "Type partial command and verify filtering"
+    status: "pending"
+    estimated_effort: "45 minutes"
+
+  - id: "TODO-021"
+    label: "core"
+    priority: 1
+    title: "Implement / command in CLI"
+    description: |
+      In agentforge_cli/cli.py, add:
+      - @cli.command(name="/")
+      - Build command catalog
+      - Display interactive palette
+      - Handle navigation and selection
+      - Execute selected command
+      - Handle ESC × 2 cancellation
+      Ensure palette works in all terminal types.
+    dependencies: ["TODO-020"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/cli.py"
+    verification:
+      logical: "Unit test with CliRunner (limited)"
+      empirical: "Manual test with real terminal"
+    status: "pending"
+    estimated_effort: "1 hour"
+
+  - id: "TODO-022"
+    label: "verify"
+    priority: 2
+    title: "Add unit tests for command palette"
+    description: |
+      Create tests/test_palette.py with tests for:
+      - Command catalog building
+      - Command filtering and search
+      - Navigation logic (mocked)
+      - Command execution
+      - ESC handling
+      Achieve >85% coverage (terminal UI limited in tests).
+    dependencies: ["TODO-021"]
+    files_created:
+      - "tests/test_palette.py"
+    files_modified: []
+    verification:
+      logical: "pytest passes all palette tests"
+      empirical: "Coverage report shows >85% for palette.py"
+    status: "pending"
+    estimated_effort: "45 minutes"
+
+  # ═══════════════════════════════════════════════════════════════
+  # PHASE 5: INTEGRATION AND ENHANCEMENT
+  # ═══════════════════════════════════════════════════════════════
+
+  - id: "TODO-023"
+    label: "support"
+    priority: 2
+    title: "Implement auto-TODO generation for new tasks"
+    description: |
+      Update queue and planning modules to:
+      - Auto-generate 20+ TODOs when new tasks added
+      - Save TODOs to session state
+      - Track TODO progress in real-time
+      - Update docs/TODOs.yaml automatically
+      Integrate with existing queue.add workflow.
+    dependencies: ["TODO-012", "TODO-017"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/queue.py"
+      - "agentforge_cli/planning.py"
+    verification:
+      logical: "Unit test TODO auto-generation"
+      empirical: "Add task and verify TODOs created"
+    status: "pending"
+    estimated_effort: "1 hour"
+
+  - id: "TODO-024"
+    label: "support"
+    priority: 2
+    title: "Enhanced logging with session tracking"
+    description: |
+      Update agentforge_cli/logger.py to:
+      - Include session_id in all log entries
+      - Track TODO progress in logs
+      - Log state transitions (discovery → planning → execution)
+      - Add session-specific log files
+      Maintain backward compatibility with existing logs.
+    dependencies: ["TODO-003"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/logger.py"
+    verification:
+      logical: "Unit test log format includes session_id"
+      empirical: "Run command and verify logs contain session"
+    status: "pending"
+    estimated_effort: "30 minutes"
+
+  - id: "TODO-025"
+    label: "support"
+    priority: 2
+    title: "Implement verification state persistence"
+    description: |
+      Update agentforge_cli/verification.py to:
+      - Save verification state to session
+      - Track logical and empirical results per TODO
+      - Persist verification reports to sessions/
+      - Restore verification state on resume
+      Integrate with double verification workflow.
+    dependencies: ["TODO-015"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/verification.py"
+    verification:
+      logical: "Unit test verification persistence"
+      empirical: "Run verification and resume to check state"
+    status: "pending"
+    estimated_effort: "45 minutes"
+
+  - id: "TODO-026"
+    label: "support"
+    priority: 3
+    title: "Update README and documentation"
+    description: |
+      Update documentation files:
+      - README.md: Add /plan, /resume, / sections
+      - AGENTFORGE_DEVELOPMENT_MANIFEST.md: Document workflows
+      - Create docs/SESSION_MANAGEMENT.md
+      - Create docs/PLANNING_GUIDE.md
+      - Create docs/COMMAND_PALETTE.md
+      Include usage examples, screenshots (ASCII), and workflows.
+    dependencies: ["TODO-022"]
+    files_created:
+      - "docs/SESSION_MANAGEMENT.md"
+      - "docs/PLANNING_GUIDE.md"
+      - "docs/COMMAND_PALETTE.md"
+    files_modified:
+      - "README.md"
+      - "AGENTFORGE_DEVELOPMENT_MANIFEST.md"
+    verification:
+      logical: "Verify all commands documented"
+      empirical: "Follow docs and execute workflows"
+    status: "pending"
+    estimated_effort: "1.5 hours"
+
+  - id: "TODO-027"
+    label: "support"
+    priority: 3
+    title: "Update configuration and constants"
+    description: |
+      Update configuration files:
+      - agentforge_cli/constants.py: Add session/planning constants
+      - agentforge_cli/config.py: Add default settings
+      - pyproject.toml: Bump version to 0.4.0
+      - Update dependencies if new libraries added
+      Ensure backward compatibility.
+    dependencies: ["TODO-026"]
+    files_created: []
+    files_modified:
+      - "agentforge_cli/constants.py"
+      - "agentforge_cli/config.py"
+      - "pyproject.toml"
+    verification:
+      logical: "Validate config structure"
+      empirical: "Run forge init with new config"
+    status: "pending"
+    estimated_effort: "30 minutes"
+
+  # ═══════════════════════════════════════════════════════════════
+  # PHASE 6: VERIFICATION AND TESTING
+  # ═══════════════════════════════════════════════════════════════
+
+  - id: "TODO-028"
+    label: "verify"
+    priority: 1
+    title: "Create comprehensive integration tests"
+    description: |
+      Create tests/test_resume_workflow.py with tests for:
+      - Complete plan → execute → verify → resume cycle
+      - Multi-session management
+      - TODO progress tracking across resume
+      - Verification state restoration
+      - Command palette → command execution
+      Test realistic workflows end-to-end.
+    dependencies: ["TODO-027"]
+    files_created:
+      - "tests/test_resume_workflow.py"
+    files_modified: []
+    verification:
+      logical: "pytest passes all integration tests"
+      empirical: "Run real workflows and verify behavior"
+    status: "pending"
+    estimated_effort: "1.5 hours"
+
+  - id: "TODO-029"
+    label: "verify"
+    priority: 1
+    title: "Run full test suite and achieve >90% coverage"
+    description: |
+      Execute complete test suite:
+      - Run pytest with coverage
+      - Verify all new tests pass
+      - Ensure no regressions in existing tests
+      - Achieve >90% coverage for new modules
+      - Generate coverage report
+      Fix any failing tests before proceeding.
+    dependencies: ["TODO-028"]
+    files_created: []
+    files_modified: []
+    verification:
+      logical: "All pytest tests pass"
+      empirical: "Coverage report shows >90%"
+    status: "pending"
+    estimated_effort: "1 hour"
+
+  - id: "TODO-030"
+    label: "verify"
+    priority: 1
+    title: "Perform load testing with sessions"
+    description: |
+      Test scalability:
+      - Create 100+ sessions and list them
+      - Generate plans with 50+ TODOs
+      - Measure session restoration time
+      - Test command palette with 50+ commands
+      - Verify memory usage under load
+      Generate performance report.
+    dependencies: ["TODO-029"]
+    files_created:
+      - "reports/performance_v0.4.0.json"
+    files_modified: []
+    verification:
+      logical: "Load tests complete without errors"
+      empirical: "Performance metrics within targets"
+    status: "pending"
+    estimated_effort: "1 hour"
+
+  - id: "TODO-031"
+    label: "verify"
+    priority: 1
+    title: "Double verification pass - logical and empirical"
+    description: |
+      Execute double verification for each new feature:
+      - Logical: Code review, unit tests, type checking
+      - Empirical: Manual testing, integration tests, real usage
+      For /plan, /resume, /:
+        - Verify file creation
+        - Verify state persistence
+        - Verify restoration accuracy
+        - Verify UI interactions
+      Document all verification results.
+    dependencies: ["TODO-030"]
+    files_created:
+      - "logs/verification_v0.4.0.json"
+    files_modified: []
+    verification:
+      logical: "All logical checks pass"
+      empirical: "All empirical tests pass"
+    status: "pending"
+    estimated_effort: "1.5 hours"
+
+  - id: "TODO-032"
+    label: "verify"
+    priority: 1
+    title: "Generate final verification report and release notes"
+    description: |
+      Create final deliverables:
+      - reports/final_verification_v0.4.0.json
+      - CHANGELOG.md entry for v0.4.0
+      - Release notes with feature descriptions
+      - Migration guide from v0.3.0 to v0.4.0
+      - Known issues and limitations
+      Update .agentforge/todos.json with completion status.
+      Tag release as v0.4.0.
+    dependencies: ["TODO-031"]
+    files_created:
+      - "reports/final_verification_v0.4.0.json"
+      - "docs/RELEASE_NOTES_v0.4.0.md"
+    files_modified:
+      - "CHANGELOG.md"
+      - ".agentforge/todos.json"
+    verification:
+      logical: "All 32 TODOs marked complete"
+      empirical: "Release artifacts validated"
+    status: "pending"
+    estimated_effort: "1 hour"
+
+# ═══════════════════════════════════════════════════════════════
+# SUMMARY
+# ═══════════════════════════════════════════════════════════════
+
+summary:
+  total_todos: 32
+  core_todos: 20
+  support_todos: 8
+  verify_todos: 4
+
+  phases:
+    - name: "Foundation"
+      todos: ["TODO-001", "TODO-002", "TODO-003", "TODO-004", "TODO-005"]
+      status: "pending"
+    - name: "Plan Command"
+      todos: ["TODO-006", "TODO-007", "TODO-008", "TODO-009", "TODO-010", "TODO-011", "TODO-012"]
+      status: "pending"
+    - name: "Resume Command"
+      todos: ["TODO-013", "TODO-014", "TODO-015", "TODO-016", "TODO-017"]
+      status: "pending"
+    - name: "Command Palette"
+      todos: ["TODO-018", "TODO-019", "TODO-020", "TODO-021", "TODO-022"]
+      status: "pending"
+    - name: "Integration"
+      todos: ["TODO-023", "TODO-024", "TODO-025", "TODO-026", "TODO-027"]
+      status: "pending"
+    - name: "Verification"
+      todos: ["TODO-028", "TODO-029", "TODO-030", "TODO-031", "TODO-032"]
+      status: "pending"
+
+  estimated_total_effort: "26.5 hours"
+
+  success_criteria:
+    - "All 32 TODOs completed with double verification"
+    - "/plan command creates docs/plan.md and docs/TODOs.yaml"
+    - "/resume command lists and restores sessions"
+    - "/ command palette provides interactive navigation"
+    - "All commands operate autonomously"
+    - "Test coverage >90% for new modules"
+    - "No regressions in existing functionality"
+    - "Documentation complete and accurate"
+
+notes: |
+  This TODO list follows AgentForge's core principles:
+  - Truth Over Comfort: Honest assessment of work required
+  - Full Completion: Every TODO must finish completely
+  - Discovery First: Structured before execution
+  - No Fabrication: Real implementations, no mocks
+  - Persistence: Continue until verified twice
+  - Self-Reliant: Find solutions when blocked
+
+  All TODOs require both logical and empirical verification before
+  being marked complete. No TODO may be skipped or merged.

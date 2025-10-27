@@ -126,6 +126,9 @@ def ensure_directories() -> None:
         constants.AGENTS_DIR,
         constants.SCHEDULES_DIR,
         constants.CNOVO_DIR,
+        constants.DOCS_DIR,
+        constants.SESSIONS_DIR,
+        constants.PROJECT_LOG_DIR,
     ):
         path.mkdir(parents=True, exist_ok=True)
 
@@ -246,6 +249,13 @@ def get_paths() -> Dict[str, Path]:
         "credential_key_file": constants.CREDENTIAL_KEY_FILE,
         "memory_db": constants.MEMORY_DB,
         "cnovo_dir": constants.CNOVO_DIR,
+        "project_root": constants.PROJECT_ROOT,
+        "docs_dir": constants.DOCS_DIR,
+        "sessions_dir": constants.SESSIONS_DIR,
+        "project_log_dir": constants.PROJECT_LOG_DIR,
+        "plan_file": constants.PLAN_FILE,
+        "discovery_file": constants.DISCOVERY_FILE,
+        "todos_file": constants.TODOS_FILE,
     }
 
 
