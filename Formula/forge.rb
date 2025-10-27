@@ -15,8 +15,8 @@ class Forge < Formula
   end
 
   resource "PyYAML" do
-    url "https://files.pythonhosted.org/packages/source/P/PyYAML/PyYAML-6.0.3.tar.gz"
-    sha256 "d76623373421df22fb4cf8817020cbb7ef15c725b9d5e45f17e189bfc384190f"
+    url "https://files.pythonhosted.org/packages/cd/e5/af35f7ea75cf72f2cd079c95ee16797de7cd71f29ea7c68ae5ce7be1eda0/PyYAML-6.0.1.tar.gz"
+    sha256 "bfdf460b1736c775f2ba9f6a92bca30bc2095067b8a9d77876d1fad6cc3b4a43"
   end
 
   resource "cryptography" do
@@ -50,8 +50,8 @@ class Forge < Formula
   end
 
   resource "charset-normalizer" do
-    url "https://files.pythonhosted.org/packages/source/c/charset-normalizer/charset-normalizer-3.4.4.tar.gz"
-    sha256 "94537985111c35f28720e43603b8e7b43a6ecfb2ce1d3058bbe955b73404e21a"
+    url "https://files.pythonhosted.org/packages/63/09/c1bc53dab74b1816a00d8d030de5bf98f724c52c1635e07681d312f20be8/charset-normalizer-3.3.2.tar.gz"
+    sha256 "f30c3cb33b24454a82faecaf01b19c18562b1e89558fb6c56de4d9118a032fd5"
   end
 
   resource "idna" do
@@ -100,8 +100,8 @@ class Forge < Formula
   end
 
   resource "jaraco.context" do
-    url "https://files.pythonhosted.org/packages/source/j/jaraco.context/jaraco.context-6.0.1.tar.gz"
-    sha256 "9bae4ea555cf0b14938dc0aee7c9f32ed303aa20a3b73e7dc80111628792d1b3"
+    url "https://files.pythonhosted.org/packages/c9/60/e83781b07f9a28d68b8b41f41268e7d208422f81f2d9b6c9a8d0a7c17391/jaraco.context-5.3.0.tar.gz"
+    sha256 "5d9e95ca0faa78943ed66f6bc658dd637430f16125d86988e77844c741ff2f11"
   end
 
   resource "jaraco.functools" do
@@ -110,12 +110,12 @@ class Forge < Formula
   end
 
   resource "more-itertools" do
-    url "https://files.pythonhosted.org/packages/source/m/more-itertools/more-itertools-10.8.0.tar.gz"
-    sha256 "f638ddf8a1a0d134181275fb5d58b086ead7c6a72429ad725c67503f13ba30bd"
+    url "https://files.pythonhosted.org/packages/df/ad/7905a7fd46ffb61d976133a4f47799388209e73cbc8c1253593335da88b4/more-itertools-10.2.0.tar.gz"
+    sha256 "8fccb480c43d3e99a00087634c06dd02b0d50fbf088b380de5a41a015ec239e1"
   end
 
   resource "backports.tarfile" do
-    url "https://files.pythonhosted.org/packages/source/b/backports.tarfile/backports.tarfile-1.2.0.tar.gz"
+    url "https://files.pythonhosted.org/packages/b4/e3/72b31fe558e3b81fb9c8f2cdb6b6c1f2c3c7c90f718168c6b0cfdacabff6/backports.tarfile-1.0.0.tar.gz"
     sha256 "d75e02c268746e1b8144c278978b6e98e85de6ad16f8e4b0844a154557eca991"
   end
 
